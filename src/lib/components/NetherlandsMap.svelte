@@ -39,7 +39,7 @@
 </script>
 
 <div class="w-full h-full" bind:clientWidth={w} bind:clientHeight={h}>
-    <svg width="100%" height="100%" viewBox="0 0 {w} {h}">
+    <svg width="100%" height="100%">
         {#each data as gem}
             <path
                 d={gem.geometry}
