@@ -1,3 +1,7 @@
-<main>
-  <h1 class="text-4xl">Hello svelte!</h1>
+<script>
+  import NetherlandsMap from "./lib/components/NetherlandsMap.svelte";
+</script>
+
+<main class="w-screen h-screen">
+    <NetherlandsMap />
 </main>
