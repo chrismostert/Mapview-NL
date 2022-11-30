@@ -28,21 +28,20 @@
         if (json) {
             data = json.features.map((feat) => {
                 return {
-                    gem_code: feat.properties.statcode,
-                    gem_name: feat.properties.statnaam,
+                    stat_code: feat.properties.statcode,
+                    stat_name: feat.properties.statnaam,
                     geometry: path(feat),
                 };
             });
-            console.log(data);
         }
     }
 </script>
 
 <div class="w-full h-full" bind:clientWidth={w} bind:clientHeight={h}>
     <svg width="100%" height="100%">
-        {#each data as gem}
+        {#each data as stat}
             <path
-                d={gem.geometry}
+                d={stat.geometry}
                 class="fill-slate-300 hover:fill-slate-600 stroke-black stroke-1"
             />
         {/each}
