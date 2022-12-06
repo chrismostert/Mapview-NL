@@ -6,7 +6,7 @@
 
 <main class="flex flex-col h-screen w-screen">
   <div class="py-4 px-8 shadow-md">
-    <h1 class="text-2xl">Title</h1>
+    <h1 class="text-2xl">Map viewer</h1>
   </div>
 
   <div class="w-full h-full grid grid-cols-12">
