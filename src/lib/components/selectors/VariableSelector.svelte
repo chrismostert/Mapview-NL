@@ -10,11 +10,13 @@
 
     // If csv data changes, find unique variables
     $: {
-        const res = new Set();
-        for (const i in $csv_data?.data) {
-            res.add($csv_data.data[i].name);
+        if ($csv_data) {
+            const res = new Set();
+            for (const i in $csv_data) {
+                res.add($csv_data[i].name);
+            }
+            variables = [...res];
         }
-        variables = [...res];
     }
 
     // If no variable is selected, select the first one
@@ -23,9 +25,7 @@
     }
 
     // Set selected data if selected variable changes
-    $: $selected_data = $csv_data?.data.filter(
-        (d) => d.name == $selected_variable
-    );
+    $: $selected_data = $csv_data?.filter((d) => d.name == $selected_variable);
 
     // Set min and max values
     $: {

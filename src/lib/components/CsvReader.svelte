@@ -31,8 +31,18 @@
                         );
                     }
 
+                    // Parse dates
+                    let data = results.data.map((elem) => {
+                        let parsed_date = Date.parse(elem.date);
+                        if (isNaN(parsed_date)) {
+                            return reject(`Invalid date ${elem.date} found`);
+                        }
+                        elem.date = parsed_date;
+                        return elem;
+                    });
+
                     error_msg = void 0;
-                    return resolve(results);
+                    return resolve(data);
                 },
                 error: (error) => {
                     return reject(error);
@@ -58,5 +68,5 @@
 {/if}
 
 {#if error_msg}
-<p class="text-red-600">{JSON.stringify(error_msg)}</p>
+    <p class="text-red-600">{JSON.stringify(error_msg)}</p>
 {/if}
