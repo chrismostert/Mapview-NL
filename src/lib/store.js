@@ -6,4 +6,5 @@ export const min_value = writable();
 export const max_value = writable();
 
 export const selected_variable = writable();
+export const selected_date = writable();
 export const selected_data = writable();
