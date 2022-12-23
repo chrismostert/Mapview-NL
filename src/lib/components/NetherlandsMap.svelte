@@ -4,6 +4,9 @@
     import rijksdriehoek from "../rijksdriehoek.js";
     import { onMount } from "svelte";
     import { selected_data, min_value, max_value } from "../store.js";
+    import tippy from "tippy.js";
+    import "tippy.js/animations/scale-subtle.css";
+    import "tippy.js/dist/tippy.css";
 
     let value_to_color = (value) => {
         let f = 1 - (value - $min_value) / ($max_value - $min_value);
@@ -69,6 +72,11 @@
     <svg width="100%" height="100%">
         {#each data as stat}
             <path
+                use:tippy={{
+                    content: stat.stat_name,
+                    animation: "scale-subtle",
+                    arrow: true,
+                }}
                 d={stat.geometry}
                 class="transition-all"
                 style={`
