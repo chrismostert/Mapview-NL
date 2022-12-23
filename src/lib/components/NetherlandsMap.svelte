@@ -4,11 +4,9 @@
     import rijksdriehoek from "../rijksdriehoek.js";
     import { onMount } from "svelte";
     import { selected_data, min_value, max_value } from "../store.js";
-    import tippy from "tippy.js";
-    import "tippy.js/animations/scale-subtle.css";
-    import "tippy.js/dist/tippy.css";
+    import { tooltip } from "../tooltip.js";
 
-    let value_to_color = (value) => {
+    const value_to_color = (value) => {
         let f = 1 - (value - $min_value) / ($max_value - $min_value);
         return interpolateRdYlBu($max_value == $min_value ? 0 : f);
     };
@@ -22,6 +20,8 @@
     let json;
     let w = 0;
     let h = 0;
+    let colors = {};
+    let values = {};
 
     // Default projection and geodata container
     let projection = rijksdriehoek().center(CENTER_COORDS);
@@ -52,30 +52,29 @@
         }
     }
 
-    // Set colors
-    let colors = {};
-
     $: {
-        console.log("Setting new colors...");
         const new_colors = {};
+        const new_values = {};
 
         for (const i in $selected_data) {
-            let { stat_code, date, name, value } = $selected_data[i];
+            let { stat_code, value } = $selected_data[i];
             new_colors[stat_code] = value_to_color(value);
+            new_values[stat_code] = value;
         }
 
         colors = new_colors;
+        values = new_values;
     }
 </script>
 
 <div class="w-full h-full" bind:clientWidth={w} bind:clientHeight={h}>
     <svg width="100%" height="100%">
-        {#each data as stat}
+        {#each data as stat (stat.stat_code)}
             <path
-                use:tippy={{
-                    content: stat.stat_name,
-                    animation: "scale-subtle",
-                    arrow: true,
+                use:tooltip={{
+                    content: `${stat.stat_name}: ${
+                        values[stat.stat_code] || "No data"
+                    }`,
                 }}
                 d={stat.geometry}
                 class="transition-all"
