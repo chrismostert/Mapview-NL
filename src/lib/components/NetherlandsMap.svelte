@@ -22,6 +22,7 @@
     let h = 0;
     let colors = {};
     let values = {};
+    let hovered;
 
     // Default projection and geodata container
     let projection = rijksdriehoek().center(CENTER_COORDS);
@@ -71,6 +72,8 @@
     <svg width="100%" height="100%">
         {#each data as stat (stat.stat_code)}
             <path
+                on:mouseleave={() => (hovered = undefined)}
+                on:mouseenter={() => (hovered = stat.stat_code)}
                 use:tooltip={{
                     content: `${stat.stat_name}: ${
                         values[stat.stat_code] || "No data"
@@ -80,7 +83,12 @@
                 class="transition-all"
                 style={`
                     fill: ${colors[stat.stat_code] || NONE_COLOR};
-                    stroke: ${colors[stat.stat_code] ? "black" : NONE_COLOR};
+                    stroke: ${
+                        stat.stat_code === hovered ? "black" : NONE_COLOR
+                    };
+                    opacity: ${
+                        !hovered || stat.stat_code === hovered ? 1 : 0.5
+                    };
                 `}
             />
         {/each}
