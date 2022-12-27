@@ -1,7 +1,7 @@
 <script>
     import { geoPath } from "d3-geo";
-    import { scaleLinear } from "d3-scale";
-    import { interpolateRdYlBu } from "d3-scale-chromatic";
+    import { scaleSequential } from "d3-scale";
+    import { interpolateYlOrRd } from "d3-scale-chromatic";
     import rijksdriehoek from "../rijksdriehoek.js";
     import { onMount } from "svelte";
     import { selected_data, min_value, max_value } from "../store.js";
@@ -16,7 +16,7 @@
     let json;
     let w = 0;
     let h = 0;
-    let scale = scaleLinear().range([1, 0]);
+    let scale = scaleSequential().interpolator(interpolateYlOrRd);
     let colors = {};
     let values = {};
     let hovered;
@@ -57,7 +57,7 @@
 
         for (const i in $selected_data) {
             let { stat_code, value } = $selected_data[i];
-            new_colors[stat_code] = interpolateRdYlBu(scale(value));
+            new_colors[stat_code] = scale(value);
             new_values[stat_code] = value;
         }
 
@@ -66,29 +66,34 @@
     }
 </script>
 
-<div class="w-full h-full" bind:clientWidth={w} bind:clientHeight={h}>
-    <svg width="100%" height="100%">
-        {#each data as stat (stat.stat_code)}
-            <path
-                on:mouseleave={() => (hovered = void 0)}
-                on:mouseenter={() => (hovered = stat.stat_code)}
-                use:tooltip={{
-                    content: `${stat.stat_name}: ${
-                        values[stat.stat_code] || "No data"
-                    }`,
-                }}
-                d={stat.geometry}
-                class="transition-all"
-                style={`
+<div class="w-full h-[95%]">
+    <div class="w-full h-full" bind:clientWidth={w} bind:clientHeight={h}>
+        <svg width="100%" height="100%">
+            {#each data as stat (stat.stat_code)}
+                <path
+                    on:mouseleave={() => (hovered = void 0)}
+                    on:mouseenter={() => (hovered = stat.stat_code)}
+                    use:tooltip={{
+                        content: `${stat.stat_name}: ${
+                            values[stat.stat_code] || "No data"
+                        }`,
+                    }}
+                    d={stat.geometry}
+                    class="transition-all"
+                    style={`
                     fill: ${colors[stat.stat_code] || NONE_COLOR};
                     stroke: ${
-                        stat.stat_code === hovered ? "black" : NONE_COLOR
+                        stat.stat_code === hovered
+                            ? "black"
+                            : colors[stat.stat_code] || NONE_COLOR
                     };
                     opacity: ${
                         !hovered || stat.stat_code === hovered ? 1 : 0.5
                     };
                 `}
-            />
-        {/each}
-    </svg>
+                />
+            {/each}
+        </svg>
+    </div>
 </div>
+<div class="w-full h-[5%]">Legend goes here</div>
