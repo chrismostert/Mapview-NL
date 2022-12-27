@@ -1,15 +1,11 @@
 <script>
     import { geoPath } from "d3-geo";
+    import { scaleLinear } from "d3-scale";
     import { interpolateRdYlBu } from "d3-scale-chromatic";
     import rijksdriehoek from "../rijksdriehoek.js";
     import { onMount } from "svelte";
     import { selected_data, min_value, max_value } from "../store.js";
     import { tooltip } from "../tooltip.js";
-
-    const value_to_color = (value) => {
-        let f = 1 - (value - $min_value) / ($max_value - $min_value);
-        return interpolateRdYlBu($max_value == $min_value ? 0 : f);
-    };
 
     // Constants
     const CENTER_COORDS = [5.38720621, 52.1551744];
@@ -20,6 +16,7 @@
     let json;
     let w = 0;
     let h = 0;
+    let scale = scaleLinear().range([1, 0]);
     let colors = {};
     let values = {};
     let hovered;
@@ -56,10 +53,11 @@
     $: {
         const new_colors = {};
         const new_values = {};
+        scale.domain([$min_value, $max_value]);
 
         for (const i in $selected_data) {
             let { stat_code, value } = $selected_data[i];
-            new_colors[stat_code] = value_to_color(value);
+            new_colors[stat_code] = interpolateRdYlBu(scale(value));
             new_values[stat_code] = value;
         }
 
@@ -72,7 +70,7 @@
     <svg width="100%" height="100%">
         {#each data as stat (stat.stat_code)}
             <path
-                on:mouseleave={() => (hovered = undefined)}
+                on:mouseleave={() => (hovered = void 0)}
                 on:mouseenter={() => (hovered = stat.stat_code)}
                 use:tooltip={{
                     content: `${stat.stat_name}: ${
