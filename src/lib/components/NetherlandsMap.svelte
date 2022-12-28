@@ -73,7 +73,7 @@
 
         max = selected_data
             ?.map((d) => d.value)
-            ?.reduce((max, cur) => (cur > max ? cur : max));
+            ?.reduce((max, cur) => (cur > max ? cur : max), 0);
 
         scale.domain([0, max]);
 
