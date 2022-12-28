@@ -1,12 +1,5 @@
 <script>
-    import {
-        csv_data,
-        selected_variable,
-        selected_date,
-        selected_data,
-        min_value,
-        max_value,
-    } from "../../store.js";
+    import { csv_data, selected_variable, selected_date } from "../../store.js";
 
     let variables = [];
     let min_date;
@@ -52,30 +45,6 @@
     // If csv data changes, find unique variables
     // Also find date range for slider
     $: update_ranges($csv_data);
-
-    // Set selected data if selected variable changes
-    $: $selected_data = $csv_data?.filter(
-        (d) => d.name == $selected_variable && d.date == $selected_date
-    );
-
-    // Set min and max values
-    $: {
-        let min = Infinity;
-        let max = -Infinity;
-
-        for (let d in $selected_data) {
-            let val = $selected_data[d].value;
-            if (val < min) {
-                min = val;
-            }
-            if (val > max) {
-                max = val;
-            }
-        }
-
-        $min_value = min;
-        $max_value = max;
-    }
 </script>
 
 {#if $selected_variable}

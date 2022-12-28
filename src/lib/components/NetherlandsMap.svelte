@@ -5,7 +5,7 @@
     import rijksdriehoek from "../rijksdriehoek.js";
     import Legend from "./Legend.svelte";
     import { onMount } from "svelte";
-    import { selected_data, min_value, max_value } from "../store.js";
+    import { csv_data, selected_variable, selected_date } from "../store.js";
     import { tooltip } from "../tooltip.js";
     import { fade } from "svelte/transition";
 
@@ -14,6 +14,7 @@
     const SCALE_DENOM = 3.25e5;
     const NONE_COLOR = "#E0E0E0";
     const RAMP_FUN = interpolateBlues;
+    const GRADIENT_STEPS = 7;
 
     // Dynamically bound variables
     let json;
@@ -22,6 +23,9 @@
     let scale = scaleSequential().interpolator(RAMP_FUN);
     let colors = {};
     let values = {};
+    let min;
+    let max;
+    let n_datapoints = 0;
     let hovered;
 
     // Default projection and geodata container
@@ -29,12 +33,10 @@
     let data = [];
 
     // Calculate stops for legend gradient
-    const steps = 6;
-    const ramp = [];
-    for (let step = 0; step <= steps; step++) {
-        ramp.push(RAMP_FUN(step / steps));
-    }
-    const ramp_string = ramp.join(",");
+    const ramp_string = Array(GRADIENT_STEPS + 1)
+        .fill()
+        .map((_, idx) => RAMP_FUN(idx / GRADIENT_STEPS))
+        .join(",");
 
     // Load the JSON
     onMount(async () => {
@@ -61,13 +63,31 @@
         }
     }
 
-    $: {
+    function calculate_colors(selected_variable, selected_date) {
+        const selected_data = $csv_data?.filter(
+            (d) => d.name == selected_variable && d.date == selected_date
+        );
+        n_datapoints = selected_data?.length;
+
         const new_colors = {};
         const new_values = {};
-        scale.domain([$min_value, $max_value]);
 
-        for (const i in $selected_data) {
-            let { stat_code, value } = $selected_data[i];
+        min = Infinity;
+        max = -Infinity;
+        for (let d in selected_data) {
+            let val = selected_data[d].value;
+            if (val < min) {
+                min = val;
+            }
+            if (val > max) {
+                max = val;
+            }
+        }
+
+        scale.domain([min, max]);
+
+        for (const i in selected_data) {
+            let { stat_code, value } = selected_data[i];
             new_colors[stat_code] = scale(value);
             new_values[stat_code] = value;
         }
@@ -75,6 +95,8 @@
         colors = new_colors;
         values = new_values;
     }
+
+    $: calculate_colors($selected_variable, $selected_date);
 </script>
 
 <div class="w-full h-[90%]">
@@ -108,10 +130,10 @@
     </div>
 </div>
 
-{#if $selected_data?.length > 0}
+{#if n_datapoints > 0}
     <div class="w-full flex justify-center" transition:fade={{ duration: 100 }}>
         <div class="w-1/2 mt-4">
-            <Legend {ramp_string} />
+            <Legend {ramp_string} min_value={min} max_value={max} />
         </div>
     </div>
 {/if}
