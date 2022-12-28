@@ -10,17 +10,15 @@
   </div>
 
   <div class="w-full h-full grid grid-cols-12">
-    <div class="pt-4 pl-8 col-span-2">
+    <div class="pt-4 pl-8 col-span-3 shadow-md my-2 mx-1">
       <CsvReader />
       <VariableSelector />
     </div>
 
-    <div class="col-span-6 p-4">
+    <div class="col-span-5 p-4 shadow-md my-2 mx-1">
       <NetherlandsMap />
     </div>
 
-    <div class="col-span-4 p-4">
-      Linechart
-    </div>
+    <div class="col-span-4 p-4 shadow-md my-2 mx-1">Linechart</div>
   </div>
 </main>
