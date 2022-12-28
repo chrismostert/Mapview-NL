@@ -2,11 +2,16 @@
   import NetherlandsMap from "./lib/components/NetherlandsMap.svelte";
   import CsvReader from "./lib/components/CsvReader.svelte";
   import VariableSelector from "./lib/components/selectors/VariableSelector.svelte";
+  import { csv_name } from "./lib/store.js";
+  import { fade } from "svelte/transition";
 </script>
 
 <main class="flex flex-col h-screen w-screen">
-  <div class="py-4 px-8 shadow-md">
-    <h1 class="text-2xl">Map viewer</h1>
+  <div class="py-4 px-8 shadow-md flex justify-between">
+    <h1 class="text-2xl">Mapview</h1>
+    {#if $csv_name}
+      <h1 transition:fade={{ duration: 100 }} class="text-2xl">{$csv_name}</h1>
+    {/if}
   </div>
 
   <div class="w-full h-full grid grid-cols-12">

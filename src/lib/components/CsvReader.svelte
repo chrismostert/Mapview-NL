@@ -1,5 +1,5 @@
 <script>
-    import { csv_data } from "../store";
+    import { csv_data, csv_name } from "../store";
     import Papa from "papaparse";
 
     const EXPECTED_FIELDS = JSON.stringify([
@@ -58,8 +58,8 @@
         accept=".csv"
         on:change={async (e) => {
             try {
-                let data = await parse_csv(e.target.files[0]);
-                $csv_data = data;
+                $csv_name = e.target.files[0].name;
+                $csv_data = await parse_csv(e.target.files[0]);
             } catch (e) {
                 error_msg = e;
             }
