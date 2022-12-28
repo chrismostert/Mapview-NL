@@ -112,7 +112,7 @@
                             : colors[stat.stat_code] || NONE_COLOR
                     };
                     opacity: ${
-                        !hovered || stat.stat_code === hovered ? 1 : 0.5
+                        !hovered || stat.stat_code === hovered ? 1 : 0.4
                     };
                 `}
                 />

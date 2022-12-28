@@ -2,8 +2,11 @@
   import NetherlandsMap from "./lib/components/NetherlandsMap.svelte";
   import CsvReader from "./lib/components/CsvReader.svelte";
   import VariableSelector from "./lib/components/selectors/VariableSelector.svelte";
+  import LineChart from "./lib/components/LineChart.svelte";
   import { csv_name } from "./lib/store.js";
   import { fade } from "svelte/transition";
+
+  let w_chart, h_chart;
 </script>
 
 <main class="flex flex-col h-screen w-screen">
@@ -24,6 +27,12 @@
       <NetherlandsMap />
     </div>
 
-    <div class="col-span-4 p-4 shadow-md my-2 mx-1">Linechart</div>
+    <div
+      class="col-span-4 shadow-md my-2 mx-1"
+      bind:clientWidth={w_chart}
+      bind:clientHeight={h_chart}
+    >
+      <LineChart width={w_chart} height={h_chart} />
+    </div>
   </div>
 </main>
