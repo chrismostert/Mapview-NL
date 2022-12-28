@@ -23,7 +23,6 @@
     let scale = scaleSequential().interpolator(RAMP_FUN);
     let colors = {};
     let values = {};
-    let min;
     let max;
     let n_datapoints = 0;
     let hovered;
@@ -72,19 +71,11 @@
         const new_colors = {};
         const new_values = {};
 
-        min = Infinity;
-        max = -Infinity;
-        for (let d in selected_data) {
-            let val = selected_data[d].value;
-            if (val < min) {
-                min = val;
-            }
-            if (val > max) {
-                max = val;
-            }
-        }
+        max = selected_data
+            ?.map((d) => d.value)
+            ?.reduce((max, cur) => (cur > max ? cur : max));
 
-        scale.domain([min, max]);
+        scale.domain([0, max]);
 
         for (const i in selected_data) {
             let { stat_code, value } = selected_data[i];
@@ -133,7 +124,7 @@
 {#if n_datapoints > 0}
     <div class="w-full flex justify-center" transition:fade={{ duration: 100 }}>
         <div class="w-1/2 mt-4">
-            <Legend {ramp_string} min_value={min} max_value={max} />
+            <Legend {ramp_string} min_value="0" max_value={max} />
         </div>
     </div>
 {/if}
