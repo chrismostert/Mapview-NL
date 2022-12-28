@@ -15,8 +15,12 @@
       <VariableSelector />
     </div>
 
-    <div class="col-span-10 p-4">
+    <div class="col-span-6 p-4">
       <NetherlandsMap />
+    </div>
+
+    <div class="col-span-4 p-4">
+      Linechart
     </div>
   </div>
 </main>
