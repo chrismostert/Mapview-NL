@@ -7,7 +7,7 @@
 
 <div class="relative w-full h-full">
     <div
-        class="h-3/4 border border-gray-500"
+        class="h-1/2 border border-gray-500"
         style={`
     background: linear-gradient(
         to right,

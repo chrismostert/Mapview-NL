@@ -118,11 +118,15 @@
         {/each}
     </svg>
 </div>
-
-{#if n_datapoints > 0}
-    <div class="w-full flex justify-center" transition:fade={{ duration: 100 }}>
-        <div class="w-1/2 mt-4">
-            <Legend {ramp_string} min_value="0" max_value={max} />
+<div class="h-[10%]">
+    {#if n_datapoints > 0}
+        <div
+            class="w-full flex justify-center"
+            transition:fade={{ duration: 100 }}
+        >
+            <div class="w-1/2">
+                <Legend {ramp_string} min_value="0" max_value={max} />
+            </div>
         </div>
-    </div>
-{/if}
+    {/if}
+</div>
