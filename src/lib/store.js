@@ -5,3 +5,5 @@ export const csv_name = writable();
 
 export const selected_variable = writable();
 export const selected_date = writable();
+
+export const stat_hovered = writable();

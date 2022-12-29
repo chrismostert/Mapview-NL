@@ -5,7 +5,7 @@
     import rijksdriehoek from "../rijksdriehoek.js";
     import Legend from "./Legend.svelte";
     import { onMount } from "svelte";
-    import { csv_data, selected_variable, selected_date } from "../store.js";
+    import { csv_data, selected_variable, selected_date, stat_hovered } from "../store.js";
     import { tooltip } from "../tooltip.js";
     import { fade } from "svelte/transition";
 
@@ -25,7 +25,6 @@
     let values = {};
     let max;
     let n_datapoints = 0;
-    let hovered;
 
     // Default projection and geodata container
     let projection = rijksdriehoek().center(CENTER_COORDS);
@@ -94,24 +93,24 @@
     <svg width="100%" height="100%">
         {#each data as stat (stat.stat_code)}
             <path
-                on:mouseleave={() => (hovered = void 0)}
-                on:mouseenter={() => (hovered = stat.stat_code)}
+                on:mouseleave={() => ($stat_hovered = void 0)}
+                on:mouseenter={() => ($stat_hovered = stat.stat_code)}
                 use:tooltip={{
                     content: `${stat.stat_name}: ${
                         values[stat.stat_code] || "No data"
                     }`,
                 }}
                 d={stat.geometry}
-                class="transition-all"
+                class="transition"
                 style={`
                     fill: ${colors[stat.stat_code] || NONE_COLOR};
                     stroke: ${
-                        stat.stat_code === hovered
+                        stat.stat_code === $stat_hovered
                             ? "black"
                             : colors[stat.stat_code] || NONE_COLOR
                     };
                     opacity: ${
-                        !hovered || stat.stat_code === hovered ? 1 : 0.4
+                        !$stat_hovered || stat.stat_code === $stat_hovered ? 1 : 0.4
                     };
                 `}
             />

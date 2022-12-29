@@ -2,37 +2,26 @@
     import { csv_data, selected_variable, selected_date } from "../../store.js";
 
     let variables = [];
-    let min_date;
-    let max_date;
-    let date_step;
+
+    let selected_date_idx;
+    let dates;
 
     function update_ranges($csv_data) {
         if ($csv_data) {
             const unique_variables = new Set();
-            let dates = [];
-            let min_date_step = Infinity;
+            dates = new Set();
 
             for (const i in $csv_data) {
                 unique_variables.add($csv_data[i].name);
-                dates.push($csv_data[i].date);
+                dates.add($csv_data[i].date);
             }
 
+            dates = [...dates];
             dates.sort();
-            min_date = dates[0];
-            max_date = dates[dates.length - 1];
-
-            for (const i in dates) {
-                if (i > 1) {
-                    let step = dates[i] - dates[i - 1];
-                    if (step != 0 && step < min_date_step) {
-                        min_date_step = step;
-                    }
-                }
-            }
 
             variables = [...unique_variables];
-            date_step = min_date_step;
-            $selected_date = max_date;
+            selected_date_idx = dates.length - 1;
+            $selected_date = dates[selected_date_idx];
             $selected_variable = variables[0];
         }
     }
@@ -45,6 +34,7 @@
     // If csv data changes, find unique variables
     // Also find date range for slider
     $: update_ranges($csv_data);
+    $: $selected_date = isFinite(selected_date_idx) ? dates[selected_date_idx] : void 0;
 </script>
 
 {#if $selected_variable}
@@ -65,10 +55,12 @@
     <input
         id="date_select"
         type="range"
-        min={min_date}
-        max={max_date}
-        step={date_step}
-        bind:value={$selected_date}
+        min={0}
+        max={dates.length - 1}
+        step={1}
+        bind:value={selected_date_idx}
     />
     {format_date($selected_date)}
 {/if}
+<br />
+{$selected_date}

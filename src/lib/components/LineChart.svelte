@@ -1,7 +1,8 @@
 <script>
-    import { csv_data, selected_variable } from "../store.js";
+    import { csv_data, selected_variable, selected_date } from "../store.js";
     import { scaleTime, scaleLinear } from "d3-scale";
     import { fade } from "svelte/transition";
+    import { stat_hovered } from "../store.js";
 
     let width = 0;
     let height = 0;
@@ -16,7 +17,6 @@
     let scale_x = scaleTime();
     let scale_y = scaleLinear();
 
-    let draw = false;
     let min_x, min_y, max_x, max_y;
     let filtered_data;
     let plot_data;
@@ -93,6 +93,17 @@
                 stroke="black"
                 stroke-width="1"
             />
+            {#if $selected_date}
+                <line
+                    x1={scale_x($selected_date)}
+                    x2={scale_x($selected_date)}
+                    y1={padding.top}
+                    y2={height - padding.bottom}
+                    stroke="black"
+                    stroke-width="1"
+                    stroke-dasharray="5,5"
+                />
+            {/if}
         </g>
         <g>
             {#each plot_data as line}
@@ -101,6 +112,12 @@
                     points={line.points}
                     fill="none"
                     stroke="black"
+                    style={`opacity: ${
+                        !$stat_hovered || line.stat_code === $stat_hovered
+                            ? 1
+                            : 0.2
+                    }`}
+                    class="transition-opacity"
                 />
             {/each}
         </g>
