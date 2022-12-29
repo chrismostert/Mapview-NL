@@ -2,6 +2,7 @@
   import NetherlandsMap from "./lib/components/NetherlandsMap.svelte";
   import CsvReader from "./lib/components/CsvReader.svelte";
   import VariableSelector from "./lib/components/selectors/VariableSelector.svelte";
+  import LineChart from "./lib/components/LineChart.svelte";
   import { csv_name } from "./lib/store.js";
   import { fade } from "svelte/transition";
 </script>
@@ -20,10 +21,12 @@
       <VariableSelector />
     </div>
 
-    <div class="col-span-5 p-4 shadow-md my-2 mx-1">
+    <div class="col-span-5 shadow-md my-2 mx-1">
       <NetherlandsMap />
     </div>
 
-    <div class="col-span-4 p-4 shadow-md my-2 mx-1">Linechart</div>
+    <div class="col-span-4 shadow-md my-2 mx-1">
+      <LineChart />
+    </div>
   </div>
 </main>

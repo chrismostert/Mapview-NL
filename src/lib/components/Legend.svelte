@@ -1,14 +1,13 @@
 <script>
-    export let ramp_string;
-    import { min_value, max_value } from "../store.js";
+    export let ramp_string, min_value, max_value;
 
     let midpoint;
-    $: midpoint = (Number($min_value) + Number($max_value)) / 2;
+    $: midpoint = (Number(min_value) + Number(max_value)) / 2;
 </script>
 
 <div class="relative w-full h-full">
     <div
-        class="h-3/4 border border-gray-500"
+        class="h-1/2 border border-gray-500"
         style={`
     background: linear-gradient(
         to right,
@@ -18,17 +17,13 @@
     />
     <div class="flex justify-between">
         <div>
-            {$min_value !== $max_value && isFinite($min_value)
-                ? $min_value
-                : ""}
+            {min_value !== max_value && isFinite(min_value) ? min_value : ""}
         </div>
         <div>
             {isFinite(midpoint) ? midpoint : ""}
         </div>
         <div>
-            {$max_value !== $min_value && isFinite($max_value)
-                ? $max_value
-                : ""}
+            {max_value !== min_value && isFinite(max_value) ? max_value : ""}
         </div>
     </div>
 </div>

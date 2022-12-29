@@ -5,7 +5,12 @@
     import rijksdriehoek from "../rijksdriehoek.js";
     import Legend from "./Legend.svelte";
     import { onMount } from "svelte";
-    import { selected_data, min_value, max_value } from "../store.js";
+    import {
+        csv_data,
+        selected_variable,
+        selected_date,
+        stat_hovered,
+    } from "../store.js";
     import { tooltip } from "../tooltip.js";
     import { fade } from "svelte/transition";
 
@@ -14,6 +19,7 @@
     const SCALE_DENOM = 3.25e5;
     const NONE_COLOR = "#E0E0E0";
     const RAMP_FUN = interpolateBlues;
+    const GRADIENT_STEPS = 7;
 
     // Dynamically bound variables
     let json;
@@ -22,19 +28,18 @@
     let scale = scaleSequential().interpolator(RAMP_FUN);
     let colors = {};
     let values = {};
-    let hovered;
+    let max;
+    let n_datapoints = 0;
 
     // Default projection and geodata container
     let projection = rijksdriehoek().center(CENTER_COORDS);
     let data = [];
 
     // Calculate stops for legend gradient
-    const steps = 6;
-    const ramp = [];
-    for (let step = 0; step <= steps; step++) {
-        ramp.push(RAMP_FUN(step / steps));
-    }
-    const ramp_string = ramp.join(",");
+    const ramp_string = Array(GRADIENT_STEPS + 1)
+        .fill()
+        .map((_, idx) => RAMP_FUN(idx / GRADIENT_STEPS))
+        .join(",");
 
     // Load the JSON
     onMount(async () => {
@@ -61,57 +66,72 @@
         }
     }
 
-    $: {
-        const new_colors = {};
-        const new_values = {};
-        scale.domain([$min_value, $max_value]);
+    function calculate_colors(selected_variable, selected_date) {
+        if (selected_variable && selected_date) {
+            const selected_data = $csv_data.filter(
+                (d) => d.name == selected_variable && d.date == selected_date
+            );
+            n_datapoints = selected_data?.length;
 
-        for (const i in $selected_data) {
-            let { stat_code, value } = $selected_data[i];
-            new_colors[stat_code] = scale(value);
-            new_values[stat_code] = value;
+            const new_colors = {};
+            const new_values = {};
+
+            max = Math.max(...selected_data.map((d) => d.value));
+            scale.domain([0, max]);
+
+            for (const i in selected_data) {
+                let { stat_code, value } = selected_data[i];
+                new_colors[stat_code] = scale(value);
+                new_values[stat_code] = value;
+            }
+
+            colors = new_colors;
+            values = new_values;
         }
-
-        colors = new_colors;
-        values = new_values;
     }
+
+    $: calculate_colors($selected_variable, $selected_date);
 </script>
 
-<div class="w-full h-[90%]">
-    <div class="w-full h-full" bind:clientWidth={w} bind:clientHeight={h}>
-        <svg width="100%" height="100%">
-            {#each data as stat (stat.stat_code)}
-                <path
-                    on:mouseleave={() => (hovered = void 0)}
-                    on:mouseenter={() => (hovered = stat.stat_code)}
-                    use:tooltip={{
-                        content: `${stat.stat_name}: ${
-                            values[stat.stat_code] || "No data"
-                        }`,
-                    }}
-                    d={stat.geometry}
-                    class="transition-all"
-                    style={`
+<div class="w-full h-[90%]" bind:clientWidth={w} bind:clientHeight={h}>
+    <svg width="100%" height="100%">
+        {#each data as stat (stat.stat_code)}
+            <path
+                on:mouseleave={() => ($stat_hovered = void 0)}
+                on:mouseenter={() => ($stat_hovered = stat.stat_code)}
+                use:tooltip={{
+                    content: `${stat.stat_name}: ${
+                        values[stat.stat_code] || "No data"
+                    }`,
+                }}
+                d={stat.geometry}
+                class="transition"
+                style={`
                     fill: ${colors[stat.stat_code] || NONE_COLOR};
                     stroke: ${
-                        stat.stat_code === hovered
+                        stat.stat_code === $stat_hovered
                             ? "black"
                             : colors[stat.stat_code] || NONE_COLOR
                     };
                     opacity: ${
-                        !hovered || stat.stat_code === hovered ? 1 : 0.5
+                        !$stat_hovered || stat.stat_code === $stat_hovered
+                            ? 1
+                            : 0.4
                     };
                 `}
-                />
-            {/each}
-        </svg>
-    </div>
+            />
+        {/each}
+    </svg>
 </div>
-
-{#if $selected_data?.length > 0}
-    <div class="w-full flex justify-center" transition:fade={{ duration: 100 }}>
-        <div class="w-1/2 mt-4">
-            <Legend {ramp_string} />
+<div class="h-[10%]">
+    {#if n_datapoints > 0}
+        <div
+            class="w-full flex justify-center"
+            transition:fade={{ duration: 100 }}
+        >
+            <div class="w-1/2">
+                <Legend {ramp_string} min_value="0" max_value={max} />
+            </div>
         </div>
-    </div>
-{/if}
+    {/if}
+</div>
