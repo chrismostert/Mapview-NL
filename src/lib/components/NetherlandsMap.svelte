@@ -5,7 +5,12 @@
     import rijksdriehoek from "../rijksdriehoek.js";
     import Legend from "./Legend.svelte";
     import { onMount } from "svelte";
-    import { csv_data, selected_variable, selected_date, stat_hovered } from "../store.js";
+    import {
+        csv_data,
+        selected_variable,
+        selected_date,
+        stat_hovered,
+    } from "../store.js";
     import { tooltip } from "../tooltip.js";
     import { fade } from "svelte/transition";
 
@@ -62,28 +67,27 @@
     }
 
     function calculate_colors(selected_variable, selected_date) {
-        const selected_data = $csv_data?.filter(
-            (d) => d.name == selected_variable && d.date == selected_date
-        );
-        n_datapoints = selected_data?.length;
+        if (selected_variable && selected_date) {
+            const selected_data = $csv_data.filter(
+                (d) => d.name == selected_variable && d.date == selected_date
+            );
+            n_datapoints = selected_data?.length;
 
-        const new_colors = {};
-        const new_values = {};
+            const new_colors = {};
+            const new_values = {};
 
-        max = selected_data
-            ?.map((d) => d.value)
-            ?.reduce((max, cur) => (cur > max ? cur : max), 0);
+            max = Math.max(...selected_data.map((d) => d.value));
+            scale.domain([0, max]);
 
-        scale.domain([0, max]);
+            for (const i in selected_data) {
+                let { stat_code, value } = selected_data[i];
+                new_colors[stat_code] = scale(value);
+                new_values[stat_code] = value;
+            }
 
-        for (const i in selected_data) {
-            let { stat_code, value } = selected_data[i];
-            new_colors[stat_code] = scale(value);
-            new_values[stat_code] = value;
+            colors = new_colors;
+            values = new_values;
         }
-
-        colors = new_colors;
-        values = new_values;
     }
 
     $: calculate_colors($selected_variable, $selected_date);
@@ -110,7 +114,9 @@
                             : colors[stat.stat_code] || NONE_COLOR
                     };
                     opacity: ${
-                        !$stat_hovered || stat.stat_code === $stat_hovered ? 1 : 0.4
+                        !$stat_hovered || stat.stat_code === $stat_hovered
+                            ? 1
+                            : 0.4
                     };
                 `}
             />

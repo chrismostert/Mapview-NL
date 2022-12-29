@@ -80,7 +80,7 @@
 
     $: handle_resize(width, height);
     $: update_data($selected_variable);
-    $: width, height, date_x_pos = scale_x($selected_date);
+    $: width, height, (date_x_pos = scale_x($selected_date));
 </script>
 
 <div class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height}>
@@ -116,14 +116,15 @@
         </g>
 
         <g>
-            {#each plot_data as line}
+            {#each plot_data as line (line.stat_code)}
                 <g
-                    style={`opacity: ${
+                    style={`
+                    opacity: ${
                         line.dates.has($selected_date) &&
                         (!$stat_hovered || line.stat_code === $stat_hovered)
                             ? 1
                             : 0.2
-                    }`}
+                    };`}
                     transition:fade={{ duration: 100 }}
                     class="transition-opacity"
                     stroke="black"
