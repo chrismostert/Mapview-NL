@@ -16,6 +16,7 @@
 
     let scale_x = scaleTime();
     let scale_y = scaleLinear();
+    let date_x_pos;
 
     let min_x, min_y, max_x, max_y;
     let filtered_data;
@@ -46,6 +47,7 @@
     function handle_resize(width, height) {
         scale_x.range([padding.left, width - padding.right]);
         scale_y.range([height - padding.bottom, padding.top]);
+
         plot_data = scale_data(filtered_data);
     }
 
@@ -64,6 +66,7 @@
 
         scale_x.domain([min_x, max_x]);
         scale_y.domain([0, max_y]);
+
         plot_data = scale_data(filtered_data);
     }
 
@@ -77,6 +80,7 @@
 
     $: handle_resize(width, height);
     $: update_data($selected_variable);
+    $: width, height, date_x_pos = scale_x($selected_date);
 </script>
 
 <div class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height}>
@@ -100,8 +104,8 @@
             />
             {#if $selected_date}
                 <line
-                    x1={scale_x($selected_date)}
-                    x2={scale_x($selected_date)}
+                    x1={date_x_pos}
+                    x2={date_x_pos}
                     y1={padding.top}
                     y2={height - padding.bottom}
                     stroke="black"
