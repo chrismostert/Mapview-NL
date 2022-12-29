@@ -30,17 +30,14 @@
             if (!plot_data_dict[stat_code])
                 plot_data_dict[stat_code] = {
                     stat_code: stat_code,
-                    points: [],
+                    x: [],
+                    y: [],
+                    dates: new Set(),
                 };
 
-            plot_data_dict[stat_code].points.push(
-                `${scale_x(date)},${scale_y(value)}`
-            );
-        }
-
-        for (let stat_code in plot_data_dict) {
-            plot_data_dict[stat_code].points =
-                plot_data_dict[stat_code].points.join(" ");
+            plot_data_dict[stat_code].x.push(scale_x(date));
+            plot_data_dict[stat_code].y.push(scale_y(value));
+            plot_data_dict[stat_code].dates.add(date);
         }
 
         return Object.values(plot_data_dict);
@@ -68,6 +65,14 @@
         scale_x.domain([min_x, max_x]);
         scale_y.domain([0, max_y]);
         plot_data = scale_data(filtered_data);
+    }
+
+    function polyline_string(x, y) {
+        let points = [];
+        for (let i in x) {
+            points.push(`${x[i]},${y[i]}`);
+        }
+        return points.join(" ");
     }
 
     $: handle_resize(width, height);
@@ -105,20 +110,28 @@
                 />
             {/if}
         </g>
+
         <g>
             {#each plot_data as line}
-                <polyline
-                    transition:fade={{ duration: 100 }}
-                    points={line.points}
-                    fill="none"
-                    stroke="black"
+                <g
                     style={`opacity: ${
-                        !$stat_hovered || line.stat_code === $stat_hovered
+                        line.dates.has($selected_date) &&
+                        (!$stat_hovered || line.stat_code === $stat_hovered)
                             ? 1
                             : 0.2
                     }`}
+                    transition:fade={{ duration: 100 }}
                     class="transition-opacity"
-                />
+                    stroke="black"
+                >
+                    <polyline
+                        points={polyline_string(line.x, line.y)}
+                        fill="none"
+                    />
+                    {#each line.x as x, i}
+                        <circle cx={x} cy={line.y[i]} r="3" />
+                    {/each}
+                </g>
             {/each}
         </g>
     </svg>

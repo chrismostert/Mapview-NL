@@ -62,5 +62,3 @@
     />
     {format_date($selected_date)}
 {/if}
-<br />
-{$selected_date}
