@@ -90,21 +90,20 @@
     $: calculate_colors($selected_variable, $selected_date);
 </script>
 
-<div class="w-full h-[90%]">
-    <div class="w-full h-full" bind:clientWidth={w} bind:clientHeight={h}>
-        <svg width="100%" height="100%">
-            {#each data as stat (stat.stat_code)}
-                <path
-                    on:mouseleave={() => (hovered = void 0)}
-                    on:mouseenter={() => (hovered = stat.stat_code)}
-                    use:tooltip={{
-                        content: `${stat.stat_name}: ${
-                            values[stat.stat_code] || "No data"
-                        }`,
-                    }}
-                    d={stat.geometry}
-                    class="transition-all"
-                    style={`
+<div class="w-full h-[90%]" bind:clientWidth={w} bind:clientHeight={h}>
+    <svg width="100%" height="100%">
+        {#each data as stat (stat.stat_code)}
+            <path
+                on:mouseleave={() => (hovered = void 0)}
+                on:mouseenter={() => (hovered = stat.stat_code)}
+                use:tooltip={{
+                    content: `${stat.stat_name}: ${
+                        values[stat.stat_code] || "No data"
+                    }`,
+                }}
+                d={stat.geometry}
+                class="transition-all"
+                style={`
                     fill: ${colors[stat.stat_code] || NONE_COLOR};
                     stroke: ${
                         stat.stat_code === hovered
@@ -115,10 +114,9 @@
                         !hovered || stat.stat_code === hovered ? 1 : 0.4
                     };
                 `}
-                />
-            {/each}
-        </svg>
-    </div>
+            />
+        {/each}
+    </svg>
 </div>
 
 {#if n_datapoints > 0}

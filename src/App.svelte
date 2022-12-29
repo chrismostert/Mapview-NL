@@ -5,8 +5,6 @@
   import LineChart from "./lib/components/LineChart.svelte";
   import { csv_name } from "./lib/store.js";
   import { fade } from "svelte/transition";
-
-  let w_chart, h_chart;
 </script>
 
 <main class="flex flex-col h-screen w-screen">
@@ -23,16 +21,12 @@
       <VariableSelector />
     </div>
 
-    <div class="col-span-5 p-4 shadow-md my-2 mx-1">
+    <div class="col-span-5 shadow-md my-2 mx-1">
       <NetherlandsMap />
     </div>
 
-    <div
-      class="col-span-4 shadow-md my-2 mx-1"
-      bind:clientWidth={w_chart}
-      bind:clientHeight={h_chart}
-    >
-      <LineChart width={w_chart} height={h_chart} />
+    <div class="col-span-4 shadow-md my-2 mx-1">
+      <LineChart />
     </div>
   </div>
 </main>
