@@ -1,10 +1,11 @@
 <script>
     import { csv_data, selected_variable, selected_date } from "../store.js";
     import { scaleTime, scaleLinear } from "d3-scale";
-    import { fade } from "svelte/transition";
     import { stat_hovered } from "../store.js";
     import Tick from "./Tick.svelte";
     import { tooltip } from "../tooltip.js";
+    import { draw } from "svelte/transition";
+    import { quadInOut } from "svelte/easing";
 
     let width = 0;
     let height = 0;
@@ -130,13 +131,13 @@
                             ? 1
                             : 0.2
                     };`}
-                    transition:fade={{ duration: 100 }}
                     class="transition-opacity"
                     stroke="black"
                 >
                     <polyline
                         points={polyline_string(line.x, line.y)}
                         fill="none"
+                        in:draw={{ duration: 500, easing: quadInOut }}
                     />
                     {#each line.x as x, i}
                         <circle
