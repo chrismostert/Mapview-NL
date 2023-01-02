@@ -91,23 +91,8 @@
 
 <div class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height}>
     <svg width="100%" height="100%">
+        <!-- Dateline -->
         <g>
-            <line
-                x1={padding.left}
-                x2={width - padding.right}
-                y1={height - padding.bottom}
-                y2={height - padding.bottom}
-                stroke="black"
-                stroke-width="1"
-            />
-            <line
-                x1={padding.left}
-                x2={padding.left}
-                y1={padding.top}
-                y2={height - padding.bottom}
-                stroke="black"
-                stroke-width="1"
-            />
             {#if $selected_date}
                 <line
                     x1={date_x_pos}
@@ -121,10 +106,12 @@
             {/if}
         </g>
 
+        <!-- Horizontal grid lines -->
         <g>
             {#each ticks_y as tick}
                 <Tick
                     x={padding.left}
+                    x_end={width - padding.right}
                     y={scale_y(tick)}
                     value={tick}
                     direction={"horizontal"}
@@ -132,6 +119,7 @@
             {/each}
         </g>
 
+        <!-- Data points -->
         <g>
             {#each plot_data as line (line.stat_code)}
                 <g
