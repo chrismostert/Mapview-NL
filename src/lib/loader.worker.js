@@ -90,17 +90,32 @@ function group_data(data) {
     let grouped = {}
 
     for (let row of data) {
+        // Variable level
         if (!grouped[row.name]) {
             grouped[row.name] = {
+                data: {}
+            };
+        }
+
+        // Date level
+        if (!grouped[row.name].data[row.date]) {
+            grouped[row.name].data[row.date] = {
                 data: []
             };
         }
-        grouped[row.name].data.push(row);
+
+        grouped[row.name].data[row.date].data.push(row);
     }
 
-    for (let group of Object.keys(grouped)) {
-        grouped[group].extremes = get_extremes(grouped[group].data);
+    for (let variable of Object.keys(grouped)) {
+        let rows = Object.values(grouped[variable].data).map(e => e.data).flat();
+        grouped[variable].extremes = get_extremes(rows);
+        for (let date of Object.keys(grouped[variable].data)) {
+            grouped[variable].data[date].extremes = get_extremes(grouped[variable].data[date].data);
+        }
     }
+
+    console.log(grouped);
 
     return grouped;
 }

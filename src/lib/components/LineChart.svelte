@@ -22,7 +22,6 @@
     let scale_y = scaleLinear();
     let date_x_pos = tweened(void 0, { duration: 150, easing: cubicOut });
 
-    let min_x, min_y, max_x, max_y;
     let filtered_data;
     let plot_data;
 
@@ -61,12 +60,16 @@
     }
 
     function update_data(selected_variable) {
-        filtered_data = $csv_data?.data[selected_variable]?.data;
-        let extremes = $csv_data?.data[selected_variable]?.extremes;
-        
-        scale_x.domain([extremes?.min_x, extremes?.max_x]);
-        scale_y.domain([0, extremes?.max_y]);
-        handle_resize(width, height);
+        if (selected_variable) {
+            filtered_data = Object.values($csv_data.data[selected_variable].data)
+                .map((e) => e.data)
+                .flat();
+            let extremes = $csv_data?.data[selected_variable]?.extremes;
+
+            scale_x.domain([extremes?.min_x, extremes?.max_x]);
+            scale_y.domain([0, extremes?.max_y]);
+            handle_resize(width, height);
+        }
     }
 
     function polyline_string(x, y) {
