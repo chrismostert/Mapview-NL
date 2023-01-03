@@ -61,20 +61,11 @@
     }
 
     function update_data(selected_variable) {
-        filtered_data = $csv_data?.data[selected_variable];
-
-        let xvals = filtered_data?.map((d) => d.date);
-        let yvals = filtered_data?.map((d) => d.value);
-
-        if (xvals && yvals) {
-            min_x = Math.min(...xvals);
-            min_y = Math.min(...yvals);
-            max_x = Math.max(...xvals);
-            max_y = Math.max(...yvals);
-        }
-
-        scale_x.domain([min_x, max_x]);
-        scale_y.domain([0, max_y]);
+        filtered_data = $csv_data?.data[selected_variable]?.data;
+        let extremes = $csv_data?.data[selected_variable]?.extremes;
+        
+        scale_x.domain([extremes?.min_x, extremes?.max_x]);
+        scale_y.domain([0, extremes?.max_y]);
         handle_resize(width, height);
     }
 

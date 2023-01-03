@@ -19,13 +19,21 @@ function parse_csv(file, expected_fields) {
                     );
                 }
 
-                // Parse dates
+                // Parse dates and numbers
                 let data = results.data.map((elem) => {
                     let parsed_date = Date.parse(elem.date);
                     if (isNaN(parsed_date)) {
                         return reject(`Invalid date ${elem.date} found`);
                     }
+
+                    let parsed_value = Number(elem.value);
+                    if (isNaN(parsed_value)) {
+                        return reject(`Non-numeric value ${elem.value} found`);
+                    }
+
                     elem.date = parsed_date;
+                    elem.value = parsed_value;
+
                     return elem;
                 });
 
@@ -56,17 +64,45 @@ function calculate_ranges(data) {
     }
 }
 
-function group_data(data) {
-    let res = {}
+function get_extremes(data) {
+    let min_x = Infinity;
+    let min_y = Infinity;
+    let max_x = 0;
+    let max_y = 0;
 
     for (let i in data) {
-        if (!res[data[i].name]) {
-            res[data[i].name] = [];
-        }
-        res[data[i].name].push(data[i]);
+        let x = data[i].date;
+        let y = data[i].value;
+
+        if (x > max_x) { max_x = x }
+        if (y > max_y) { max_y = y }
+        if (x < min_x) { min_x = x }
+        if (y < min_y) { min_y = y }
     }
 
-    return res;
+    return {
+        min_x, min_y, max_x, max_y
+    }
+
+}
+
+function group_data(data) {
+    let grouped = {}
+
+    for (let row of data) {
+        if (!grouped[row.name]) {
+            grouped[row.name] = {
+                data: []
+            };
+        }
+        grouped[row.name].data.push(row);
+    }
+
+    for (let group of Object.keys(grouped)) {
+        grouped[group].extremes = get_extremes(grouped[group].data);
+    }
+
+    return grouped;
 }
 
 onmessage = async (msg) => {
@@ -76,12 +112,14 @@ onmessage = async (msg) => {
             console.log("Reading csv file in worker...");
             let raw_data = await parse_csv(msg.data.file, msg.data.expected_fields);
             let ranges = calculate_ranges(raw_data);
+            let extremes = get_extremes(raw_data);
             let data = group_data(raw_data);
 
             postMessage({
                 result: {
-                    data: data,
-                    ranges
+                    data,
+                    ranges,
+                    extremes
                 }
             });
         } catch (e) {
