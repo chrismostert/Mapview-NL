@@ -1,10 +1,12 @@
 <script>
     import { csv_data, selected_variable, selected_date } from "../store.js";
     import { scaleTime, scaleLinear } from "d3-scale";
-    import { fade } from "svelte/transition";
     import { stat_hovered } from "../store.js";
     import Tick from "./Tick.svelte";
     import { tooltip } from "../tooltip.js";
+    import { draw, fade } from "svelte/transition";
+    import { tweened } from "svelte/motion";
+    import { quadInOut, cubicOut } from "svelte/easing";
 
     let width = 0;
     let height = 0;
@@ -18,7 +20,7 @@
 
     let scale_x = scaleTime();
     let scale_y = scaleLinear();
-    let date_x_pos;
+    let date_x_pos = tweened(void 0, { duration: 150, easing: cubicOut });
 
     let min_x, min_y, max_x, max_y;
     let filtered_data;
@@ -86,45 +88,32 @@
 
     $: handle_resize(width, height);
     $: update_data($selected_variable);
-    $: width, height, (date_x_pos = scale_x($selected_date));
+    $: width, height, date_x_pos.set(scale_x($selected_date));
 </script>
 
 <div class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height}>
     <svg width="100%" height="100%">
+        <!-- Dateline -->
         <g>
-            <line
-                x1={padding.left}
-                x2={width - padding.right}
-                y1={height - padding.bottom}
-                y2={height - padding.bottom}
-                stroke="black"
-                stroke-width="1"
-            />
-            <line
-                x1={padding.left}
-                x2={padding.left}
-                y1={padding.top}
-                y2={height - padding.bottom}
-                stroke="black"
-                stroke-width="1"
-            />
             {#if $selected_date}
                 <line
-                    x1={date_x_pos}
-                    x2={date_x_pos}
+                    x1={$date_x_pos}
+                    x2={$date_x_pos}
                     y1={padding.top}
                     y2={height - padding.bottom}
-                    stroke="black"
+                    stroke="gray"
                     stroke-width="1"
                     stroke-dasharray="5,5"
                 />
             {/if}
         </g>
 
+        <!-- Horizontal grid lines -->
         <g>
             {#each ticks_y as tick}
                 <Tick
                     x={padding.left}
+                    x_end={width - padding.left - padding.right}
                     y={scale_y(tick)}
                     value={tick}
                     direction={"horizontal"}
@@ -132,8 +121,9 @@
             {/each}
         </g>
 
+        <!-- Data points -->
         <g>
-            {#each plot_data as line (line.stat_code)}
+            {#each plot_data as line (line.stat_code + $selected_variable)}
                 <g
                     style={`
                     opacity: ${
@@ -142,16 +132,17 @@
                             ? 1
                             : 0.2
                     };`}
-                    transition:fade={{ duration: 100 }}
                     class="transition-opacity"
                     stroke="black"
                 >
                     <polyline
                         points={polyline_string(line.x, line.y)}
                         fill="none"
+                        in:draw={{ duration: 250, easing: quadInOut }}
                     />
                     {#each line.x as x, i}
                         <circle
+                            in:fade={{duration:100}}
                             use:tooltip={{
                                 content: `${line.stat_code}: ${Math.floor(
                                     scale_y.invert(line.y[i])
