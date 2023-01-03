@@ -61,7 +61,7 @@
     }
 
     function update_data(selected_variable) {
-        filtered_data = $csv_data?.filter((d) => d.name === selected_variable);
+        filtered_data = $csv_data?.data?.filter((d) => d.name === selected_variable);
 
         let xvals = filtered_data?.map((d) => d.date);
         let yvals = filtered_data?.map((d) => d.value);
