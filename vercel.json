@@ -1,7 +1,7 @@
 {
     "headers": [
         {
-            "source": "/gemeente_gegeneraliseerd*.geojson",
+            "source": "/gemeente_gegeneraliseerd(.*).geojson",
             "headers": [
                 {
                     "key": "Cache-Control",
