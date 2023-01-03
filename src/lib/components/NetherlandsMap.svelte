@@ -68,8 +68,8 @@
 
     function calculate_colors(selected_variable, selected_date) {
         if (selected_variable && selected_date) {
-            const selected_data = $csv_data.data.filter(
-                (d) => d.name == selected_variable && d.date == selected_date
+            const selected_data = $csv_data.data[selected_variable].filter(
+                (d) => d.date == selected_date
             );
             n_datapoints = selected_data?.length;
 

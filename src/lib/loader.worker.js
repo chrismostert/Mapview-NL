@@ -56,16 +56,31 @@ function calculate_ranges(data) {
     }
 }
 
+function group_data(data) {
+    let res = {}
+
+    for (let i in data) {
+        if (!res[data[i].name]) {
+            res[data[i].name] = [];
+        }
+        res[data[i].name].push(data[i]);
+    }
+
+    return res;
+}
+
 onmessage = async (msg) => {
     // Load csv file
     if (msg.data.file) {
         try {
             console.log("Reading csv file in worker...");
-            let data = await parse_csv(msg.data.file, msg.data.expected_fields);
-            let ranges = calculate_ranges(data);
+            let raw_data = await parse_csv(msg.data.file, msg.data.expected_fields);
+            let ranges = calculate_ranges(raw_data);
+            let data = group_data(raw_data);
+
             postMessage({
                 result: {
-                    data,
+                    data: data,
                     ranges
                 }
             });

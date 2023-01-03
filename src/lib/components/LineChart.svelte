@@ -61,7 +61,7 @@
     }
 
     function update_data(selected_variable) {
-        filtered_data = $csv_data?.data?.filter((d) => d.name === selected_variable);
+        filtered_data = $csv_data?.data[selected_variable];
 
         let xvals = filtered_data?.map((d) => d.date);
         let yvals = filtered_data?.map((d) => d.value);
@@ -142,7 +142,7 @@
                     />
                     {#each line.x as x, i}
                         <circle
-                            in:fade={{duration:100}}
+                            in:fade={{ duration: 100 }}
                             use:tooltip={{
                                 content: `${line.stat_code}: ${Math.floor(
                                     scale_y.invert(line.y[i])
