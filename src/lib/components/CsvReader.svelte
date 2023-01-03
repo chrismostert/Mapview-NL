@@ -41,7 +41,9 @@
                         return elem;
                     });
 
-                    error_msg = void 0;
+                    // Sort by date
+                    data.sort((a, b) => a.date - b.date);
+
                     return resolve(data);
                 },
                 error: (error) => {
