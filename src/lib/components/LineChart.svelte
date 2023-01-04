@@ -134,7 +134,7 @@
                         fill="none"
                         in:draw={{ duration: 250, easing: quadInOut }}
                     />
-                    {#each line.x as x, i}
+                    <!--{#each line.x as x, i}
                         <circle
                             in:fade={{ duration: 100 }}
                             use:tooltip={{
@@ -149,7 +149,7 @@
                             cy={line.y[i]}
                             r="3"
                         />
-                    {/each}
+                    {/each}-->
                 </g>
             {/each}
         </g></svg
