@@ -7,6 +7,8 @@
     import { tweened } from "svelte/motion";
     import { quadInOut, cubicOut } from "svelte/easing";
 
+    const CIRCLE_RADIUS = 2;
+
     let width = 0;
     let height = 0;
 
@@ -82,11 +84,11 @@
     function polyline_string(x, y) {
         let res = "";
 
-        res += `M${x[0]},${y[0]}${circle_path(2)}`;
+        res += `M${x[0]},${y[0]}${circle_path(CIRCLE_RADIUS)}`;
 
         if (x.length > 1) {
             for (let i = 1; i < x.length; i++) {
-                res += `L${x[i]},${y[i]}${circle_path(2)}`;
+                res += `L${x[i]},${y[i]}${circle_path(CIRCLE_RADIUS)}`;
             }
         }
 
@@ -131,24 +133,22 @@
         <!-- Data points -->
         <g>
             {#each plot_data as line (line.stat_code + $selected_variable)}
-                <g
+                >
+                <path
+                    d={polyline_string(line.x, line.y)}
+                    in:draw={{ duration: 250, easing: quadInOut }}
                     style={`
-                    opacity: ${
-                        (!$stat_hovered && line.dates.has($selected_date)) ||
-                        line.stat_code === $stat_hovered
-                            ? 1
-                            : 0.2
-                    };`}
+                            opacity: ${
+                                (!$stat_hovered &&
+                                    line.dates.has($selected_date)) ||
+                                line.stat_code === $stat_hovered
+                                    ? 1
+                                    : 0.2
+                            };`}
                     class="transition-opacity"
                     stroke="black"
-                >
-                    <path
-                        d={polyline_string(line.x, line.y)}
-                        fill="black"
-                        stroke="black"
-                        in:draw={{ duration: 250, easing: quadInOut }}
-                    />
-                </g>
+                    fill="black"
+                />
             {/each}
         </g></svg
     >
