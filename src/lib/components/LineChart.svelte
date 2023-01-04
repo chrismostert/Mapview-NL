@@ -3,8 +3,7 @@
     import { scaleTime, scaleLinear } from "d3-scale";
     import { stat_hovered } from "../store.js";
     import Tick from "./Tick.svelte";
-    import { tooltip } from "../tooltip.js";
-    import { draw, fade } from "svelte/transition";
+    import { draw } from "svelte/transition";
     import { tweened } from "svelte/motion";
     import { quadInOut, cubicOut } from "svelte/easing";
 
@@ -61,7 +60,9 @@
 
     function update_data(selected_variable) {
         if (selected_variable) {
-            filtered_data = Object.values($csv_data.data[selected_variable].data)
+            filtered_data = Object.values(
+                $csv_data.data[selected_variable].data
+            )
                 .map((e) => e.data)
                 .flat();
             let extremes = $csv_data?.data[selected_variable]?.extremes;
@@ -72,12 +73,24 @@
         }
     }
 
+    function circle_path(r) {
+        return `m${-r},0a${r},${r} 0 1,0 ${r * 2},0a${r},${r} 0 1,0 ${
+            -r * 2
+        },0m${r},0`;
+    }
+
     function polyline_string(x, y) {
-        let points = [];
-        for (let i in x) {
-            points.push(`${x[i]},${y[i]}`);
+        let res = "";
+
+        res += `M${x[0]},${y[0]}${circle_path(2)}`;
+
+        if (x.length > 1) {
+            for (let i = 1; i < x.length; i++) {
+                res += `L${x[i]},${y[i]}${circle_path(2)}`;
+            }
         }
-        return points.join(" ");
+
+        return res;
     }
 
     $: handle_resize(width, height);
@@ -129,27 +142,12 @@
                     class="transition-opacity"
                     stroke="black"
                 >
-                    <polyline
-                        points={polyline_string(line.x, line.y)}
-                        fill="none"
+                    <path
+                        d={polyline_string(line.x, line.y)}
+                        fill="black"
+                        stroke="black"
                         in:draw={{ duration: 250, easing: quadInOut }}
                     />
-                    <!--{#each line.x as x, i}
-                        <circle
-                            in:fade={{ duration: 100 }}
-                            use:tooltip={{
-                                content: `${line.stat_code}: ${Math.floor(
-                                    scale_y.invert(line.y[i])
-                                )}`,
-                            }}
-                            on:mouseleave={() => ($stat_hovered = void 0)}
-                            on:mouseenter={() =>
-                                ($stat_hovered = line.stat_code)}
-                            cx={x}
-                            cy={line.y[i]}
-                            r="3"
-                        />
-                    {/each}-->
                 </g>
             {/each}
         </g></svg
