@@ -82,9 +82,7 @@
     }
 
     function polyline_string(x, y) {
-        let res = "";
-
-        res += `M${x[0]},${y[0]}${circle_path(CIRCLE_RADIUS)}`;
+        let res = `M${x[0]},${y[0]}${circle_path(CIRCLE_RADIUS)}`;
 
         if (x.length > 1) {
             for (let i = 1; i < x.length; i++) {
@@ -133,7 +131,6 @@
         <!-- Data points -->
         <g>
             {#each plot_data as line (line.stat_code + $selected_variable)}
-                >
                 <path
                     d={polyline_string(line.x, line.y)}
                     in:draw={{ duration: 250, easing: quadInOut }}
