@@ -1,5 +1,5 @@
 <script>
-    import { csv_data, selected_variable, selected_date } from "../../store.js";
+    import { csv_data, selected_variable, selected_date, selected_date_idx } from "../../store.js";
 
     function format_date(date_epoch) {
         let date = new Date(date_epoch);
@@ -7,18 +7,16 @@
     }
 
     const init_selection = (data) => {
-        selected_date_idx = data.ranges.dates.length - 1;
+        $selected_date_idx = data.ranges.dates.length - 1;
         $selected_variable = data.ranges.variables[0];
     };
-
-    let selected_date_idx;
 
     $: if ($csv_data) {
         init_selection($csv_data);
     }
 
-    $: if (isFinite(selected_date_idx)) {
-        $selected_date = $csv_data.ranges.dates[selected_date_idx];
+    $: if (isFinite($selected_date_idx)) {
+        $selected_date = $csv_data.ranges.dates[$selected_date_idx];
     }
 </script>
 
@@ -43,7 +41,7 @@
         min={0}
         max={$csv_data.ranges.dates.length - 1}
         step={1}
-        bind:value={selected_date_idx}
+        bind:value={$selected_date_idx}
     />
     {format_date($selected_date)}
 {/if}

@@ -1,11 +1,16 @@
 <script>
-    import { csv_data, selected_variable, selected_date } from "../store.js";
+    import {
+        csv_data,
+        selected_variable,
+        selected_date,
+        selected_date_idx,
+    } from "../store.js";
     import { scaleTime, scaleLinear } from "d3-scale";
     import { stat_hovered } from "../store.js";
     import Tick from "./Tick.svelte";
     import { fade } from "svelte/transition";
     import { tweened } from "svelte/motion";
-    import { quadInOut, cubicOut } from "svelte/easing";
+    import { cubicOut } from "svelte/easing";
 
     const CIRCLE_RADIUS = 2;
 
@@ -25,6 +30,8 @@
 
     let filtered_data;
     let plot_data;
+
+    let dates;
 
     let ticks_x = [];
     let ticks_y = [];
@@ -93,13 +100,26 @@
         return res;
     }
 
+    function handle_click(e) {
+        if (dates) {
+            const rect = e.target.getBoundingClientRect();
+            const clicked_date = scale_x.invert(e.clientX - rect.left);
+
+            const dists = dates.map((e) => Math.abs(clicked_date - e));
+            let closest_date_idx = dists.indexOf(Math.min(...dists));
+
+            $selected_date_idx = closest_date_idx;
+        }
+    }
+
     $: handle_resize(width, height);
     $: update_data($selected_variable);
     $: width, height, date_x_pos.set(scale_x($selected_date));
+    $: dates = $csv_data?.ranges?.dates;
 </script>
 
 <div class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height}>
-    <svg width="100%" height="100%">
+    <svg width="100%" height="100%" on:click={handle_click} on:keydown>
         <!-- Dateline -->
         <g>
             {#if $selected_date}
