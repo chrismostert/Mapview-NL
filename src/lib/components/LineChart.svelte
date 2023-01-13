@@ -3,7 +3,7 @@
     import { scaleTime, scaleLinear } from "d3-scale";
     import { stat_hovered } from "../store.js";
     import Tick from "./Tick.svelte";
-    import { draw } from "svelte/transition";
+    import { fade } from "svelte/transition";
     import { tweened } from "svelte/motion";
     import { quadInOut, cubicOut } from "svelte/easing";
 
@@ -133,7 +133,7 @@
             {#each plot_data as line (line.stat_code + $selected_variable)}
                 <path
                     d={polyline_string(line.x, line.y)}
-                    in:draw={{ duration: 250, easing: quadInOut }}
+                    in:fade={{ duration: 100 }}
                     style={`
                             opacity: ${
                                 (!$stat_hovered &&

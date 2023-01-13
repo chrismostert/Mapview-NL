@@ -14,7 +14,7 @@
 
     const onWorkerMessage = (msg) => {
         if (msg.data.error) {
-            error_msg = msg.data.error;
+            error_msg = msg.data.error.message;
         } else if (msg.data.result) {
             $csv_data = msg.data.result;
         }
