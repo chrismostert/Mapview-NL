@@ -1,6 +1,9 @@
 <script>
     import { csv_data, csv_name } from "../store";
-    import Papa from "papaparse";
+    import { onMount } from "svelte";
+
+    let worker;
+    let error_msg;
 
     const EXPECTED_FIELDS = JSON.stringify([
         "stat_code",
@@ -9,49 +12,19 @@
         "value",
     ]);
 
-    let error_msg;
-
-    const parse_csv = (file) => {
-        return new Promise((resolve, reject) => {
-            Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
-                complete: (results) => {
-                    console.log(results);
-                    if (results.errors.length > 0) {
-                        return reject(results.errors);
-                    }
-                    if (
-                        JSON.stringify(results.meta.fields) != EXPECTED_FIELDS
-                    ) {
-                        return reject(
-                            `Invalid fields in csv file! Expected ${EXPECTED_FIELDS} but got ${JSON.stringify(
-                                results.meta.fields
-                            )}`
-                        );
-                    }
-
-                    // Parse dates
-                    let data = results.data.map((elem) => {
-                        let parsed_date = Date.parse(elem.date);
-                        if (isNaN(parsed_date)) {
-                            return reject(`Invalid date ${elem.date} found`);
-                        }
-                        elem.date = parsed_date;
-                        return elem;
-                    });
-
-                    // Sort by date
-                    data.sort((a, b) => a.date - b.date);
-
-                    return resolve(data);
-                },
-                error: (error) => {
-                    return reject(error);
-                },
-            });
-        });
+    const onWorkerMessage = (msg) => {
+        if (msg.data.error) {
+            error_msg = msg.data.error;
+        } else if (msg.data.result) {
+            $csv_data = msg.data.result;
+        }
     };
+
+    onMount(async () => {
+        const worker_import = await import("../loader.worker?worker");
+        worker = new worker_import.default();
+        worker.onmessage = onWorkerMessage;
+    });
 </script>
 
 {#if !$csv_data}
@@ -59,12 +32,11 @@
         type="file"
         accept=".csv"
         on:change={async (e) => {
-            try {
-                $csv_name = e.target.files[0].name;
-                $csv_data = await parse_csv(e.target.files[0]);
-            } catch (e) {
-                error_msg = e;
-            }
+            $csv_name = e.target.files[0].name;
+            worker.postMessage({
+                file: e.target.files[0],
+                expected_fields: EXPECTED_FIELDS,
+            });
         }}
     />
 {/if}

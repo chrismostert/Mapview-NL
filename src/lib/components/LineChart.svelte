@@ -3,10 +3,11 @@
     import { scaleTime, scaleLinear } from "d3-scale";
     import { stat_hovered } from "../store.js";
     import Tick from "./Tick.svelte";
-    import { tooltip } from "../tooltip.js";
-    import { draw, fade } from "svelte/transition";
+    import { draw } from "svelte/transition";
     import { tweened } from "svelte/motion";
     import { quadInOut, cubicOut } from "svelte/easing";
+
+    const CIRCLE_RADIUS = 2;
 
     let width = 0;
     let height = 0;
@@ -22,7 +23,6 @@
     let scale_y = scaleLinear();
     let date_x_pos = tweened(void 0, { duration: 150, easing: cubicOut });
 
-    let min_x, min_y, max_x, max_y;
     let filtered_data;
     let plot_data;
 
@@ -61,29 +61,36 @@
     }
 
     function update_data(selected_variable) {
-        filtered_data = $csv_data?.filter((d) => d.name === selected_variable);
+        if (selected_variable) {
+            filtered_data = Object.values(
+                $csv_data.data[selected_variable].data
+            )
+                .map((e) => e.data)
+                .flat();
+            let extremes = $csv_data?.data[selected_variable]?.extremes;
 
-        let xvals = filtered_data?.map((d) => d.date);
-        let yvals = filtered_data?.map((d) => d.value);
-
-        if (xvals && yvals) {
-            min_x = Math.min(...xvals);
-            min_y = Math.min(...yvals);
-            max_x = Math.max(...xvals);
-            max_y = Math.max(...yvals);
+            scale_x.domain([extremes?.min_x, extremes?.max_x]);
+            scale_y.domain([0, extremes?.max_y]);
+            handle_resize(width, height);
         }
+    }
 
-        scale_x.domain([min_x, max_x]);
-        scale_y.domain([0, max_y]);
-        handle_resize(width, height);
+    function circle_path(r) {
+        return `m${-r},0a${r},${r} 0 1,0 ${r * 2},0a${r},${r} 0 1,0 ${
+            -r * 2
+        },0m${r},0`;
     }
 
     function polyline_string(x, y) {
-        let points = [];
-        for (let i in x) {
-            points.push(`${x[i]},${y[i]}`);
+        let res = `M${x[0]},${y[0]}${circle_path(CIRCLE_RADIUS)}`;
+
+        if (x.length > 1) {
+            for (let i = 1; i < x.length; i++) {
+                res += `L${x[i]},${y[i]}${circle_path(CIRCLE_RADIUS)}`;
+            }
         }
-        return points.join(" ");
+
+        return res;
     }
 
     $: handle_resize(width, height);
@@ -124,39 +131,21 @@
         <!-- Data points -->
         <g>
             {#each plot_data as line (line.stat_code + $selected_variable)}
-                <g
+                <path
+                    d={polyline_string(line.x, line.y)}
+                    in:draw={{ duration: 250, easing: quadInOut }}
                     style={`
-                    opacity: ${
-                        (!$stat_hovered && line.dates.has($selected_date)) ||
-                        line.stat_code === $stat_hovered
-                            ? 1
-                            : 0.2
-                    };`}
+                            opacity: ${
+                                (!$stat_hovered &&
+                                    line.dates.has($selected_date)) ||
+                                line.stat_code === $stat_hovered
+                                    ? 1
+                                    : 0.2
+                            };`}
                     class="transition-opacity"
                     stroke="black"
-                >
-                    <polyline
-                        points={polyline_string(line.x, line.y)}
-                        fill="none"
-                        in:draw={{ duration: 250, easing: quadInOut }}
-                    />
-                    {#each line.x as x, i}
-                        <circle
-                            in:fade={{duration:100}}
-                            use:tooltip={{
-                                content: `${line.stat_code}: ${Math.floor(
-                                    scale_y.invert(line.y[i])
-                                )}`,
-                            }}
-                            on:mouseleave={() => ($stat_hovered = void 0)}
-                            on:mouseenter={() =>
-                                ($stat_hovered = line.stat_code)}
-                            cx={x}
-                            cy={line.y[i]}
-                            r="3"
-                        />
-                    {/each}
-                </g>
+                    fill="black"
+                />
             {/each}
         </g></svg
     >

@@ -68,15 +68,16 @@
 
     function calculate_colors(selected_variable, selected_date) {
         if (selected_variable && selected_date) {
-            const selected_data = $csv_data.filter(
-                (d) => d.name == selected_variable && d.date == selected_date
-            );
+            const selected_data =
+                $csv_data.data[selected_variable]?.data[selected_date]?.data;
             n_datapoints = selected_data?.length;
 
             const new_colors = {};
             const new_values = {};
 
-            max = Math.max(...selected_data.map((d) => d.value));
+            max =
+                $csv_data.data[selected_variable].data[selected_date]?.extremes
+                    .max_y;
             scale.domain([0, max]);
 
             for (const i in selected_data) {
