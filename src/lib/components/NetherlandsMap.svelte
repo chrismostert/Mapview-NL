@@ -72,7 +72,6 @@
         const path = geoPath().projection(projection);
 
         if (json) {
-            console.log("Map redrawn")
             data = json.features.map((feat) => {
                 return {
                     stat_code: feat.properties.statcode,
