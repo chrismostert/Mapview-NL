@@ -20,8 +20,11 @@
     const NONE_COLOR = "#E0E0E0";
     const RAMP_FUN = interpolateBlues;
     const GRADIENT_STEPS = 7;
+    const MAP_YEARS = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
 
     // Dynamically bound variables
+    let maps_year = {};
+    let loaded_year = MAP_YEARS[MAP_YEARS.length - 1];
     let json;
     let w = 0;
     let h = 0;
@@ -43,8 +46,21 @@
 
     // Load the JSON
     onMount(async () => {
-        const response = await fetch("/gemeente_gegeneraliseerd_2022.geojson");
+        // Load newest map so we can draw ASAP
+        let newest_year = MAP_YEARS[MAP_YEARS.length - 1];
+        const response = await fetch(
+            `/gemeente_gegeneraliseerd_${newest_year}.geojson`
+        );
         json = await response.json();
+        maps_year[newest_year] = json;
+
+        // Asynchronously fetch the other maps so that we can quickly switch if date range
+        // requires this.
+        MAP_YEARS.slice(0, MAP_YEARS.length - 1).map((year) =>
+            fetch(`/gemeente_gegeneraliseerd_${year}.geojson`).then((res) =>
+                res.json().then((res) => (maps_year[year] = res))
+            )
+        );
     });
 
     // When the width or height of parent container changes, recalculate projection
@@ -56,6 +72,7 @@
         const path = geoPath().projection(projection);
 
         if (json) {
+            console.log("Map redrawn")
             data = json.features.map((feat) => {
                 return {
                     stat_code: feat.properties.statcode,
@@ -89,6 +106,20 @@
             colors = new_colors;
             values = new_values;
         }
+    }
+
+    // When date range changes year, we have to draw a different map
+    $: if (
+        $selected_date &&
+        new Date($selected_date).getFullYear() != loaded_year
+    ) {
+        // Clamp year to available maps
+        let new_year = Math.min(
+            Math.max(new Date($selected_date).getFullYear(), MAP_YEARS[0]),
+            MAP_YEARS[MAP_YEARS.length - 1]
+        );
+        json = maps_year[new_year];
+        loaded_year = new_year;
     }
 
     $: calculate_colors($selected_variable, $selected_date);
