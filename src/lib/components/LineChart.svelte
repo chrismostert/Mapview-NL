@@ -147,11 +147,11 @@
 					in:fade={{ duration: 100 }}
 					style={`
                             opacity: ${
-															(!$stat_hovered && line.dates.has($selected_date)) ||
-															line.stat_code === $stat_hovered
-																? 1
-																: 0.2
-														};`}
+								(!$stat_hovered && line.dates.has($selected_date)) ||
+								line.stat_code === $stat_hovered
+									? 1
+									: 0.2
+							};`}
 					class="transition-opacity"
 					stroke="black"
 					fill="black"

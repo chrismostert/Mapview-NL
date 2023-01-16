@@ -123,10 +123,10 @@
 				style={`
                     fill: ${colors[stat.stat_code] || NONE_COLOR};
                     stroke: ${
-											stat.stat_code === $stat_hovered
-												? 'black'
-												: colors[stat.stat_code] || NONE_COLOR
-										};
+						stat.stat_code === $stat_hovered
+							? 'black'
+							: colors[stat.stat_code] || NONE_COLOR
+					};
                     opacity: ${!$stat_hovered || stat.stat_code === $stat_hovered ? 1 : 0.4};
                 `}
 			/>
