@@ -1,5 +1,5 @@
 <script>
-    import { csv_data, selected_variable, selected_date, selected_date_idx } from "../../store.js";
+    import { csv_data, selected_variable, selected_date, selected_date_idx } from "../store.js";
 
     function format_date(date_epoch) {
         let date = new Date(date_epoch);

@@ -1,7 +1,7 @@
 <script>
   import NetherlandsMap from "./lib/components/NetherlandsMap.svelte";
   import CsvReader from "./lib/components/CsvReader.svelte";
-  import VariableSelector from "./lib/components/selectors/VariableSelector.svelte";
+  import VariableSelector from "./lib/components/VariableSelector.svelte";
   import LineChart from "./lib/components/LineChart.svelte";
   import { csv_name } from "./lib/store.js";
   import { fade } from "svelte/transition";
