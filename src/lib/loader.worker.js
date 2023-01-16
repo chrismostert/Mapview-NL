@@ -115,8 +115,6 @@ function group_data(data) {
         }
     }
 
-    console.log(grouped);
-
     return grouped;
 }
 
@@ -124,7 +122,6 @@ onmessage = async (msg) => {
     // Load csv file
     if (msg.data.file) {
         try {
-            console.log("Reading csv file in worker...");
             let raw_data = await parse_csv(msg.data.file, msg.data.expected_fields);
             let ranges = calculate_ranges(raw_data);
             let extremes = get_extremes(raw_data);
