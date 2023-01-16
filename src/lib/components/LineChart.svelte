@@ -111,52 +111,54 @@
 
 <div class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
 	<svg width="100%" height="100%" on:click={handle_click} on:keydown>
-		<!-- Dateline -->
-		<g>
-			{#if $selected_date}
-				<line
-					x1={$date_x_pos}
-					x2={$date_x_pos}
-					y1={padding.top}
-					y2={height - padding.bottom}
-					stroke="gray"
-					stroke-width="1"
-					stroke-dasharray="5,5"
-				/>
-			{/if}
-		</g>
+		{#if $csv_data}
+			<!-- Dateline -->
+			<g>
+				{#if $selected_date}
+					<line
+						x1={$date_x_pos}
+						x2={$date_x_pos}
+						y1={padding.top}
+						y2={height - padding.bottom}
+						stroke="gray"
+						stroke-width="1"
+						stroke-dasharray="5,5"
+					/>
+				{/if}
+			</g>
 
-		<!-- Horizontal grid lines -->
-		<g>
-			{#each ticks_y as tick}
-				<Tick
-					x={padding.left}
-					x_end={width - padding.left - padding.right}
-					y={scale_y(tick)}
-					value={tick}
-					direction={'horizontal'}
-				/>
-			{/each}
-		</g>
+			<!-- Horizontal grid lines -->
+			<g>
+				{#each ticks_y as tick}
+					<Tick
+						x={padding.left}
+						x_end={width - padding.left - padding.right}
+						y={scale_y(tick)}
+						value={tick}
+						direction={'horizontal'}
+					/>
+				{/each}
+			</g>
 
-		<!-- Data points -->
-		<g>
-			{#each plot_data as line (line.stat_code + $selected_variable)}
-				<path
-					d={polyline_string(line.x, line.y)}
-					in:fade={{ duration: 100 }}
-					style={`
+			<!-- Data points -->
+			<g>
+				{#each plot_data as line (line.stat_code + $selected_variable)}
+					<path
+						d={polyline_string(line.x, line.y)}
+						in:fade={{ duration: 100 }}
+						style={`
                             opacity: ${
 								(!$stat_hovered && line.dates.has($selected_date)) ||
 								line.stat_code === $stat_hovered
 									? 1
 									: 0.2
 							};`}
-					class="transition-opacity"
-					stroke="black"
-					fill="black"
-				/>
-			{/each}
-		</g></svg
+						class="transition-opacity"
+						stroke="black"
+						fill="black"
+					/>
+				{/each}
+			</g>
+		{/if}</svg
 	>
 </div>

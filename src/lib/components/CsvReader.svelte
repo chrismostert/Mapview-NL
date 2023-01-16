@@ -5,11 +5,11 @@
 	let worker;
 	let error_msg;
 
-	const EXPECTED_FIELDS = JSON.stringify(['stat_code', 'date', 'name', 'value']);
+	const EXPECTED_FIELDS = ['stat_code', 'date', 'name', 'value'];
 
 	const onWorkerMessage = (msg) => {
 		if (msg.data.error) {
-			error_msg = msg.data.error.message;
+			error_msg = msg.data.error.message || msg.data.error;
 		} else if (msg.data.result) {
 			$csv_data = msg.data.result;
 		}
