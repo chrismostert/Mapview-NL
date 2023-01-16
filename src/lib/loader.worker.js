@@ -11,8 +11,10 @@ function parse_csv(file, expected_fields) {
 				}
 
 				for (let field of expected_fields) {
-					if (!(results.meta.fields).includes(field)) {
-						return reject(`Required field '${field}' was not present in the selected file`)
+					if (!results.meta.fields.includes(field)) {
+						return reject(
+							`Required field '${field}' was not present in the selected file`
+						);
 					}
 				}
 
