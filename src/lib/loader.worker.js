@@ -9,12 +9,11 @@ function parse_csv(file, expected_fields) {
 				if (results.errors.length > 0) {
 					return reject(results.errors);
 				}
-				if (JSON.stringify(results.meta.fields) != expected_fields) {
-					return reject(
-						`Invalid fields in csv file! Expected ${expected_fields} but got ${JSON.stringify(
-							results.meta.fields
-						)}`
-					);
+
+				for (let field of expected_fields) {
+					if (!(results.meta.fields).includes(field)) {
+						return reject(`Required field '${field}' was not present in the selected file`)
+					}
 				}
 
 				// Parse dates and numbers
