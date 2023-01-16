@@ -1,152 +1,162 @@
 <script>
-    import { csv_data, selected_variable, selected_date } from "../store.js";
-    import { scaleTime, scaleLinear } from "d3-scale";
-    import { stat_hovered } from "../store.js";
-    import Tick from "./Tick.svelte";
-    import { draw } from "svelte/transition";
-    import { tweened } from "svelte/motion";
-    import { quadInOut, cubicOut } from "svelte/easing";
+	import { csv_data, selected_variable, selected_date, selected_date_idx } from '../store.js';
+	import { scaleTime, scaleLinear } from 'd3-scale';
+	import { stat_hovered } from '../store.js';
+	import Tick from './Tick.svelte';
+	import { fade } from 'svelte/transition';
+	import { tweened } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
 
-    const CIRCLE_RADIUS = 2;
+	const CIRCLE_RADIUS = 2;
 
-    let width = 0;
-    let height = 0;
+	let width = 0;
+	let height = 0;
 
-    const padding = {
-        top: 50,
-        left: 50,
-        right: 50,
-        bottom: 50,
-    };
+	const padding = {
+		top: 50,
+		left: 50,
+		right: 50,
+		bottom: 50
+	};
 
-    let scale_x = scaleTime();
-    let scale_y = scaleLinear();
-    let date_x_pos = tweened(void 0, { duration: 150, easing: cubicOut });
+	let scale_x = scaleTime();
+	let scale_y = scaleLinear();
+	let date_x_pos = tweened(void 0, { duration: 150, easing: cubicOut });
 
-    let filtered_data;
-    let plot_data;
+	let filtered_data;
+	let plot_data;
 
-    let ticks_x = [];
-    let ticks_y = [];
+	let dates;
 
-    function scale_data(filtered_data) {
-        let plot_data_dict = {};
+	let ticks_x = [];
+	let ticks_y = [];
 
-        for (let idx in filtered_data) {
-            let { stat_code, date, value } = filtered_data[idx];
+	function scale_data(filtered_data) {
+		let plot_data_dict = {};
 
-            if (!plot_data_dict[stat_code])
-                plot_data_dict[stat_code] = {
-                    stat_code: stat_code,
-                    x: [],
-                    y: [],
-                    dates: new Set(),
-                };
+		for (let idx in filtered_data) {
+			let { stat_code, date, value } = filtered_data[idx];
 
-            plot_data_dict[stat_code].x.push(scale_x(date));
-            plot_data_dict[stat_code].y.push(scale_y(value));
-            plot_data_dict[stat_code].dates.add(date);
-        }
+			if (!plot_data_dict[stat_code])
+				plot_data_dict[stat_code] = {
+					stat_code: stat_code,
+					x: [],
+					y: [],
+					dates: new Set()
+				};
 
-        ticks_x = scale_x.ticks(10);
-        ticks_y = scale_y.ticks(10);
-        return Object.values(plot_data_dict);
-    }
+			plot_data_dict[stat_code].x.push(scale_x(date));
+			plot_data_dict[stat_code].y.push(scale_y(value));
+			plot_data_dict[stat_code].dates.add(date);
+		}
 
-    function handle_resize(width, height) {
-        scale_x.range([padding.left, width - padding.right]);
-        scale_y.nice(10).range([height - padding.bottom, padding.top]);
+		ticks_x = scale_x.ticks(10);
+		ticks_y = scale_y.ticks(10);
+		return Object.values(plot_data_dict);
+	}
 
-        plot_data = scale_data(filtered_data);
-    }
+	function handle_resize(width, height) {
+		scale_x.range([padding.left, width - padding.right]);
+		scale_y.nice(10).range([height - padding.bottom, padding.top]);
 
-    function update_data(selected_variable) {
-        if (selected_variable) {
-            filtered_data = Object.values(
-                $csv_data.data[selected_variable].data
-            )
-                .map((e) => e.data)
-                .flat();
-            let extremes = $csv_data?.data[selected_variable]?.extremes;
+		plot_data = scale_data(filtered_data);
+	}
 
-            scale_x.domain([extremes?.min_x, extremes?.max_x]);
-            scale_y.domain([0, extremes?.max_y]);
-            handle_resize(width, height);
-        }
-    }
+	function update_data(selected_variable) {
+		if (selected_variable) {
+			filtered_data = Object.values($csv_data.data[selected_variable].data)
+				.map((e) => e.data)
+				.flat();
+			let extremes = $csv_data?.data[selected_variable]?.extremes;
 
-    function circle_path(r) {
-        return `m${-r},0a${r},${r} 0 1,0 ${r * 2},0a${r},${r} 0 1,0 ${
-            -r * 2
-        },0m${r},0`;
-    }
+			scale_x.domain([extremes?.min_x, extremes?.max_x]);
+			scale_y.domain([0, extremes?.max_y]);
+			handle_resize(width, height);
+		}
+	}
 
-    function polyline_string(x, y) {
-        let res = `M${x[0]},${y[0]}${circle_path(CIRCLE_RADIUS)}`;
+	function circle_path(r) {
+		return `m${-r},0a${r},${r} 0 1,0 ${r * 2},0a${r},${r} 0 1,0 ${-r * 2},0m${r},0`;
+	}
 
-        if (x.length > 1) {
-            for (let i = 1; i < x.length; i++) {
-                res += `L${x[i]},${y[i]}${circle_path(CIRCLE_RADIUS)}`;
-            }
-        }
+	function polyline_string(x, y) {
+		let res = `M${x[0]},${y[0]}${circle_path(CIRCLE_RADIUS)}`;
 
-        return res;
-    }
+		if (x.length > 1) {
+			for (let i = 1; i < x.length; i++) {
+				res += `L${x[i]},${y[i]}${circle_path(CIRCLE_RADIUS)}`;
+			}
+		}
 
-    $: handle_resize(width, height);
-    $: update_data($selected_variable);
-    $: width, height, date_x_pos.set(scale_x($selected_date));
+		return res;
+	}
+
+	function handle_click(e) {
+		if (dates) {
+			const rect = e.target.getBoundingClientRect();
+			const clicked_date = scale_x.invert(e.clientX - rect.left);
+
+			const dists = dates.map((e) => Math.abs(clicked_date - e));
+			let closest_date_idx = dists.indexOf(Math.min(...dists));
+
+			$selected_date_idx = closest_date_idx;
+		}
+	}
+
+	$: handle_resize(width, height);
+	$: update_data($selected_variable);
+	$: width, height, date_x_pos.set(scale_x($selected_date));
+	$: dates = $csv_data?.ranges?.dates;
 </script>
 
-<div class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height}>
-    <svg width="100%" height="100%">
-        <!-- Dateline -->
-        <g>
-            {#if $selected_date}
-                <line
-                    x1={$date_x_pos}
-                    x2={$date_x_pos}
-                    y1={padding.top}
-                    y2={height - padding.bottom}
-                    stroke="gray"
-                    stroke-width="1"
-                    stroke-dasharray="5,5"
-                />
-            {/if}
-        </g>
+<div class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
+	<svg width="100%" height="100%" on:click={handle_click} on:keydown>
+		<!-- Dateline -->
+		<g>
+			{#if $selected_date}
+				<line
+					x1={$date_x_pos}
+					x2={$date_x_pos}
+					y1={padding.top}
+					y2={height - padding.bottom}
+					stroke="gray"
+					stroke-width="1"
+					stroke-dasharray="5,5"
+				/>
+			{/if}
+		</g>
 
-        <!-- Horizontal grid lines -->
-        <g>
-            {#each ticks_y as tick}
-                <Tick
-                    x={padding.left}
-                    x_end={width - padding.left - padding.right}
-                    y={scale_y(tick)}
-                    value={tick}
-                    direction={"horizontal"}
-                />
-            {/each}
-        </g>
+		<!-- Horizontal grid lines -->
+		<g>
+			{#each ticks_y as tick}
+				<Tick
+					x={padding.left}
+					x_end={width - padding.left - padding.right}
+					y={scale_y(tick)}
+					value={tick}
+					direction={'horizontal'}
+				/>
+			{/each}
+		</g>
 
-        <!-- Data points -->
-        <g>
-            {#each plot_data as line (line.stat_code + $selected_variable)}
-                <path
-                    d={polyline_string(line.x, line.y)}
-                    in:draw={{ duration: 250, easing: quadInOut }}
-                    style={`
+		<!-- Data points -->
+		<g>
+			{#each plot_data as line (line.stat_code + $selected_variable)}
+				<path
+					d={polyline_string(line.x, line.y)}
+					in:fade={{ duration: 100 }}
+					style={`
                             opacity: ${
-                                (!$stat_hovered &&
-                                    line.dates.has($selected_date)) ||
-                                line.stat_code === $stat_hovered
-                                    ? 1
-                                    : 0.2
-                            };`}
-                    class="transition-opacity"
-                    stroke="black"
-                    fill="black"
-                />
-            {/each}
-        </g></svg
-    >
+															(!$stat_hovered && line.dates.has($selected_date)) ||
+															line.stat_code === $stat_hovered
+																? 1
+																: 0.2
+														};`}
+					class="transition-opacity"
+					stroke="black"
+					fill="black"
+				/>
+			{/each}
+		</g></svg
+	>
 </div>
