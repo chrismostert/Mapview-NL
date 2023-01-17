@@ -41,6 +41,7 @@
 		"d3-scale": "^4.0.2",
 		"d3-scale-chromatic": "^3.0.0",
 		"papaparse": "^5.3.2",
-		"tippy.js": "^6.3.7"
+		"tippy.js": "^6.3.7",
+		"topojson-client": "^3.1.0"
 	}
 }
