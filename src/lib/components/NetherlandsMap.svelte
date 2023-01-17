@@ -8,6 +8,7 @@
 	import { csv_data, selected_variable, selected_date, stat_hovered } from '../store.js';
 	import { tooltip } from '../tooltip.js';
 	import { fade } from 'svelte/transition';
+	import { feature as topojson_feature } from 'topojson-client';
 
 	// Constants
 	const CENTER_COORDS = [5.38720621, 52.1551744];
@@ -15,11 +16,10 @@
 	const NONE_COLOR = '#E0E0E0';
 	const RAMP_FUN = interpolateBlues;
 	const GRADIENT_STEPS = 7;
-	const MAP_YEARS = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
 
 	// Dynamically bound variables
 	let maps_year = {};
-	let loaded_year = MAP_YEARS[MAP_YEARS.length - 1];
+	let loaded_year;
 	let json;
 	let w = 0;
 	let h = 0;
@@ -41,19 +41,18 @@
 
 	// Load the JSON
 	onMount(async () => {
-		// Load newest map so we can draw ASAP
-		let newest_year = MAP_YEARS[MAP_YEARS.length - 1];
-		const response = await fetch(`/gemeente_gegeneraliseerd_${newest_year}.geojson`);
-		json = await response.json();
-		maps_year[newest_year] = json;
+		const pattern = /gemeente_gegeneraliseerd_(\d{4})/;
 
-		// Asynchronously fetch the other maps so that we can quickly switch if date range
-		// requires this.
-		MAP_YEARS.slice(0, MAP_YEARS.length - 1).map((year) =>
-			fetch(`/gemeente_gegeneraliseerd_${year}.geojson`).then((res) =>
-				res.json().then((res) => (maps_year[year] = res))
-			)
-		);
+		const response = await fetch('gemeente_gegeneraliseerd.topojson');
+		const topo = await response.json();
+		const years = Object.keys(topo.objects).map((name) => Number(name.match(pattern)[1]));
+
+		for (const year of years) {
+			maps_year[year] = topojson_feature(topo, `gemeente_gegeneraliseerd_${year}`);
+		}
+
+		loaded_year = years[years.length - 1];
+		json = maps_year[loaded_year];
 	});
 
 	// When the width or height of parent container changes, recalculate projection
@@ -98,10 +97,12 @@
 	// When date range changes year, we have to draw a different map
 	$: if ($selected_date && new Date($selected_date).getFullYear() != loaded_year) {
 		// Clamp year to available maps
+		let n_years = Object.keys(maps_year).length;
 		let new_year = Math.min(
-			Math.max(new Date($selected_date).getFullYear(), MAP_YEARS[0]),
-			MAP_YEARS[MAP_YEARS.length - 1]
+			Math.max(new Date($selected_date).getFullYear(), Object.keys(maps_year)[0]),
+			Object.keys(maps_year)[n_years - 1]
 		);
+
 		json = maps_year[new_year];
 		loaded_year = new_year;
 	}
