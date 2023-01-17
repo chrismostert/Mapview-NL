@@ -19,6 +19,8 @@
 		bottom: 50
 	};
 
+	let chart_elem;
+
 	let scale_x = scaleTime();
 	let scale_y = scaleLinear();
 	let date_x_pos = tweened(void 0, { duration: 150, easing: cubicOut });
@@ -67,10 +69,9 @@
 			filtered_data = Object.values($csv_data.data[selected_variable].data)
 				.map((e) => e.data)
 				.flat();
-			let extremes = $csv_data?.data[selected_variable]?.extremes;
 
-			scale_x.domain([extremes?.min_x, extremes?.max_x]);
-			scale_y.domain([0, extremes?.max_y]);
+			scale_x.domain([$csv_data.extremes.min_x, $csv_data.extremes.max_x]);
+			scale_y.domain([0, $csv_data.data[selected_variable].extremes.max_y]);
 			handle_resize(width, height);
 		}
 	}
@@ -93,7 +94,7 @@
 
 	function handle_click(e) {
 		if (dates) {
-			const rect = e.target.getBoundingClientRect();
+			const rect = chart_elem.getBoundingClientRect();
 			const clicked_date = scale_x.invert(e.clientX - rect.left);
 
 			const dists = dates.map((e) => Math.abs(clicked_date - e));
@@ -109,7 +110,12 @@
 	$: dates = $csv_data?.ranges?.dates;
 </script>
 
-<div class="h-full w-full" bind:clientWidth={width} bind:clientHeight={height}>
+<div
+	class="h-full w-full"
+	bind:clientWidth={width}
+	bind:clientHeight={height}
+	bind:this={chart_elem}
+>
 	<svg width="100%" height="100%" on:click={handle_click} on:keydown>
 		{#if $csv_data}
 			<!-- Dateline -->
