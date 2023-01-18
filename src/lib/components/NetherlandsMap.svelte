@@ -112,9 +112,16 @@
 
 <div class="h-[90%] w-full" bind:clientWidth={w} bind:clientHeight={h}>
 	<svg width="100%" height="100%">
+		<!-- Fully opaque backbround rect acts as a hitbox for when the mouse leaves a municipality -->
+		<rect
+			class="opacity-0"
+			width="100%"
+			height="100%"
+			on:mouseenter={() => ($stat_hovered = void 0)}
+		/>
+
 		{#each data as stat (stat.stat_code)}
 			<path
-				on:mouseleave={() => ($stat_hovered = void 0)}
 				on:mouseenter={() => ($stat_hovered = stat.stat_code)}
 				use:tooltip={{
 					content: `${stat.stat_name}: ${values[stat.stat_code] || 'No data'}`
