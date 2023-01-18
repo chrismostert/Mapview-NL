@@ -7,9 +7,13 @@
 	import { fade } from 'svelte/transition';
 </script>
 
+<svelte:head>
+	<title>Mapview NL</title>
+</svelte:head>
+
 <main class="flex h-screen w-screen flex-col">
 	<div class="flex justify-between py-4 px-8 shadow-md">
-		<h1 class="text-2xl">Mapview</h1>
+		<h1 class="text-2xl">Mapview NL</h1>
 		{#if $csv_name}
 			<h1 transition:fade={{ duration: 100 }} class="text-2xl">{$csv_name}</h1>
 		{/if}
