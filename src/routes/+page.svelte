@@ -14,7 +14,7 @@
 
 <main>
 	{#if $loading_message}
-		<LoadingOverlay message={'aaaaaa'} />
+		<LoadingOverlay message={$loading_message} />
 	{/if}
 
 	<div class="flex h-screen w-screen flex-col">
