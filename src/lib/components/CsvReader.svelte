@@ -1,5 +1,5 @@
 <script>
-	import { csv_data, csv_name } from '../store';
+	import { csv_data, csv_name, loading_message } from '../store';
 	import { onMount } from 'svelte';
 
 	let worker;
@@ -8,10 +8,16 @@
 	const EXPECTED_FIELDS = ['stat_code', 'date', 'name', 'value'];
 
 	const onWorkerMessage = (msg) => {
-		if (msg.data.error) {
-			error_msg = msg.data.error.message || msg.data.error;
-		} else if (msg.data.result) {
-			$csv_data = msg.data.result;
+		if (msg.data.status) {
+			$loading_message = msg.data.status;
+		} else {
+			if (msg.data.error) {
+				error_msg = msg.data.error.message || msg.data.error;
+			}
+			if (msg.data.result) {
+				$csv_data = msg.data.result;
+			}
+			$loading_message = void 0;
 		}
 	};
 
