@@ -187,15 +187,15 @@
 						d={polyline_string(line.x, line.y)}
 						in:fade={{ duration: 100 }}
 						style={`
-                            opacity: ${
+                            color: ${
 								(!$stat_hovered && line.dates.has($selected_date)) ||
 								line.stat_code === $stat_hovered
-									? 1
-									: 0.2
+									? 'black'
+									: '#CCCCCC'
 							};`}
-						class="mix-blend-luminosity transition-opacity"
-						stroke="black"
-						fill="black"
+						class="transition-color mix-blend-multiply"
+						stroke="currentColor"
+						fill="currentColor"
 					/>
 				{/each}
 			</g>
