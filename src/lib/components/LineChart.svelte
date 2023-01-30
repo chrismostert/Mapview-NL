@@ -193,7 +193,7 @@
 									? 'black'
 									: '#CCCCCC'
 							};`}
-						class="transition-color mix-blend-multiply"
+						class="transition-color mix-blend-color-burn"
 						stroke="currentColor"
 						fill="currentColor"
 					/>
