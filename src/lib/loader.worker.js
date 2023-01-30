@@ -132,6 +132,10 @@ function group_data(data) {
 onmessage = async (msg) => {
 	// Load csv file
 	if (msg.data.file) {
+		postMessage({
+			status: 'Loading CSV file'
+		});
+
 		try {
 			let raw_data = await parse_csv(msg.data.file, msg.data.expected_fields);
 			let ranges = calculate_ranges(raw_data);
