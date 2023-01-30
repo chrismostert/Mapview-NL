@@ -180,23 +180,35 @@
 				{/each}
 			</g>
 
-			<!-- Data points -->
+			<!-- Data points not selected -->
 			<g>
 				{#each plot_data as line (line.stat_code + $selected_variable)}
-					<path
-						d={polyline_string(line.x, line.y)}
-						in:fade={{ duration: 100 }}
-						style={`
-                            color: ${
-								(!$stat_hovered && line.dates.has($selected_date)) ||
-								line.stat_code === $stat_hovered
-									? 'black'
-									: '#CCCCCC'
-							};`}
-						class="transition-color mix-blend-color-burn"
-						stroke="currentColor"
-						fill="currentColor"
-					/>
+					{#if !((!$stat_hovered && line.dates.has($selected_date)) || line.stat_code === $stat_hovered)}
+						<path
+							d={polyline_string(line.x, line.y)}
+							in:fade={{ duration: 100 }}
+							class="transition-color"
+							style="color: #CCCCCC"
+							stroke="currentColor"
+							fill="currentColor"
+						/>
+					{/if}
+				{/each}
+			</g>
+
+			<!-- Data points selected -->
+			<g>
+				{#each plot_data as line (line.stat_code + $selected_variable)}
+					{#if (!$stat_hovered && line.dates.has($selected_date)) || line.stat_code === $stat_hovered}
+						<path
+							d={polyline_string(line.x, line.y)}
+							in:fade={{ duration: 100 }}
+							class="transition-color"
+							style="color: black"
+							stroke="currentColor"
+							fill="currentColor"
+						/>
+					{/if}
 				{/each}
 			</g>
 		{/if}</svg
