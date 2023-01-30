@@ -33,6 +33,9 @@
 	let ticks_x = [];
 	let ticks_y = [];
 
+	let n_ticks_x;
+	let n_ticks_y;
+
 	function scale_data(filtered_data) {
 		let plot_data_dict = {};
 
@@ -52,14 +55,14 @@
 			plot_data_dict[stat_code].dates.add(date);
 		}
 
-		ticks_x = scale_x.ticks(10);
-		ticks_y = scale_y.ticks(10);
+		ticks_x = scale_x.ticks(n_ticks_x);
+		ticks_y = scale_y.ticks(n_ticks_y);
 		return Object.values(plot_data_dict);
 	}
 
 	function handle_resize(width, height) {
 		scale_x.range([padding.left, width - padding.right]);
-		scale_y.nice(10).range([height - padding.bottom, padding.top]);
+		scale_y.nice(n_ticks_y).range([height - padding.bottom, padding.top]);
 
 		plot_data = scale_data(filtered_data);
 	}
@@ -108,6 +111,24 @@
 	$: update_data($selected_variable);
 	$: width, height, date_x_pos.set(scale_x($selected_date));
 	$: dates = $csv_data?.ranges?.dates;
+
+	// Dynamically adjust number of x ticks
+	$: if (width >= 500) {
+		n_ticks_x = 10;
+	} else if (width >= 200) {
+		n_ticks_x = 2;
+	} else {
+		n_ticks_x = 1;
+	}
+
+	// Adjust number of y ticks as well
+	$: if (height >= 500) {
+		n_ticks_y = 10;
+	} else if (height >= 200) {
+		n_ticks_y = 5;
+	} else {
+		n_ticks_y = 3;
+	}
 </script>
 
 <div
@@ -142,6 +163,19 @@
 						y={scale_y(tick)}
 						value={tick}
 						direction={'horizontal'}
+					/>
+				{/each}
+			</g>
+
+			<!-- Date labels -->
+			<g>
+				{#each ticks_x as tick}
+					<Tick
+						x={scale_x(tick)}
+						x_end={scale_x(tick)}
+						y={height - padding.bottom}
+						value={scale_x.tickFormat()(tick)}
+						direction={'vertical'}
 					/>
 				{/each}
 			</g>
