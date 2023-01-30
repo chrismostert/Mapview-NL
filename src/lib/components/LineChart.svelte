@@ -193,7 +193,7 @@
 									? 1
 									: 0.2
 							};`}
-						class="transition-opacity"
+						class="mix-blend-multiply transition-opacity"
 						stroke="black"
 						fill="black"
 					/>
