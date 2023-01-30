@@ -114,7 +114,7 @@
 
 	// Dynamically adjust number of x ticks
 	$: if (width >= 500) {
-		n_ticks_x = 10;
+		n_ticks_x = 6;
 	} else if (width >= 200) {
 		n_ticks_x = 2;
 	} else {
