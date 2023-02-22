@@ -2,7 +2,7 @@
 	import NetherlandsMap from '$lib/components/NetherlandsMap.svelte';
 	import CsvReader from '$lib/components/CsvReader.svelte';
 	import VariableSelector from '$lib/components/VariableSelector.svelte';
-	import LineChart from '$lib/components/LineChart.svelte';
+	import LineChart from '$lib/components/LineChart/LineChart.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
 	import { csv_name, loading_message } from '$lib/store.js';
 	import { fade } from 'svelte/transition';

@@ -1,13 +1,10 @@
 <script>
-	import { csv_data, selected_variable, selected_date, selected_date_idx } from '../store.js';
+	import { csv_data, selected_variable, selected_date, selected_date_idx } from '../../store.js';
 	import { scaleTime, scaleLinear } from 'd3-scale';
-	import { stat_hovered } from '../store.js';
+	import { stat_hovered } from '../../store.js';
 	import Tick from './Tick.svelte';
-	import { fade } from 'svelte/transition';
-	import { tweened } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
-
-	const CIRCLE_RADIUS = 2;
+	import DateLine from './DateLine.svelte';
+	import Line from './Line.svelte';
 
 	let width = 0;
 	let height = 0;
@@ -23,15 +20,17 @@
 
 	let scale_x = scaleTime();
 	let scale_y = scaleLinear();
-	let date_x_pos = tweened(void 0, { duration: 150, easing: cubicOut });
+
+	let dates;
+	let date_x_pos;
 
 	let filtered_data;
 	let plot_data;
 
-	let dates;
-
 	let ticks_x = [];
 	let ticks_y = [];
+	let n_ticks_x;
+	let n_ticks_y;
 
 	function scale_data(filtered_data) {
 		let plot_data_dict = {};
@@ -52,16 +51,17 @@
 			plot_data_dict[stat_code].dates.add(date);
 		}
 
-		ticks_x = scale_x.ticks(10);
-		ticks_y = scale_y.ticks(10);
+		ticks_x = scale_x.ticks(n_ticks_x);
+		ticks_y = scale_y.ticks(n_ticks_y);
 		return Object.values(plot_data_dict);
 	}
 
 	function handle_resize(width, height) {
 		scale_x.range([padding.left, width - padding.right]);
-		scale_y.nice(10).range([height - padding.bottom, padding.top]);
+		scale_y.nice(n_ticks_y).range([height - padding.bottom, padding.top]);
 
 		plot_data = scale_data(filtered_data);
+		date_x_pos = scale_x($selected_date);
 	}
 
 	function update_data(selected_variable) {
@@ -74,22 +74,6 @@
 			scale_y.domain([0, $csv_data.data[selected_variable].extremes.max_y]);
 			handle_resize(width, height);
 		}
-	}
-
-	function circle_path(r) {
-		return `m${-r},0a${r},${r} 0 1,0 ${r * 2},0a${r},${r} 0 1,0 ${-r * 2},0m${r},0`;
-	}
-
-	function polyline_string(x, y) {
-		let res = `M${x[0]},${y[0]}${circle_path(CIRCLE_RADIUS)}`;
-
-		if (x.length > 1) {
-			for (let i = 1; i < x.length; i++) {
-				res += `L${x[i]},${y[i]}${circle_path(CIRCLE_RADIUS)}`;
-			}
-		}
-
-		return res;
 	}
 
 	function handle_click(e) {
@@ -106,8 +90,27 @@
 
 	$: handle_resize(width, height);
 	$: update_data($selected_variable);
-	$: width, height, date_x_pos.set(scale_x($selected_date));
+
 	$: dates = $csv_data?.ranges?.dates;
+	$: date_x_pos = scale_x($selected_date);
+
+	// Dynamically adjust number of x ticks
+	$: if (width >= 500) {
+		n_ticks_x = 6;
+	} else if (width >= 200) {
+		n_ticks_x = 2;
+	} else {
+		n_ticks_x = 1;
+	}
+
+	// Adjust number of y ticks as well
+	$: if (height >= 500) {
+		n_ticks_y = 10;
+	} else if (height >= 200) {
+		n_ticks_y = 5;
+	} else {
+		n_ticks_y = 3;
+	}
 </script>
 
 <div
@@ -118,21 +121,6 @@
 >
 	<svg width="100%" height="100%" on:click={handle_click} on:keydown>
 		{#if $csv_data}
-			<!-- Dateline -->
-			<g>
-				{#if $selected_date}
-					<line
-						x1={$date_x_pos}
-						x2={$date_x_pos}
-						y1={padding.top}
-						y2={height - padding.bottom}
-						stroke="gray"
-						stroke-width="1"
-						stroke-dasharray="5,5"
-					/>
-				{/if}
-			</g>
-
 			<!-- Horizontal grid lines -->
 			<g>
 				{#each ticks_y as tick}
@@ -146,25 +134,38 @@
 				{/each}
 			</g>
 
-			<!-- Data points -->
+			<!-- Date labels -->
 			<g>
-				{#each plot_data as line (line.stat_code + $selected_variable)}
-					<path
-						d={polyline_string(line.x, line.y)}
-						in:fade={{ duration: 100 }}
-						style={`
-                            opacity: ${
-								(!$stat_hovered && line.dates.has($selected_date)) ||
-								line.stat_code === $stat_hovered
-									? 1
-									: 0.2
-							};`}
-						class="transition-opacity"
-						stroke="black"
-						fill="black"
+				{#each ticks_x as tick}
+					<Tick
+						x={scale_x(tick)}
+						x_end={scale_x(tick)}
+						y={height - padding.bottom}
+						value={scale_x.tickFormat()(tick)}
+						direction={'vertical'}
 					/>
 				{/each}
 			</g>
-		{/if}</svg
-	>
+
+			<DateLine x={date_x_pos} y1={padding.top} y2={height - padding.bottom} />
+
+			<!-- Data points not selected -->
+			<g>
+				{#each plot_data as line (line.stat_code + $selected_variable)}
+					{#if !((!$stat_hovered && line.dates.has($selected_date)) || line.stat_code === $stat_hovered)}
+						<Line x={line.x} y={line.y} color="#CCCCCC" />
+					{/if}
+				{/each}
+			</g>
+
+			<!-- Data points selected -->
+			<g>
+				{#each plot_data as line (line.stat_code + $selected_variable)}
+					{#if (!$stat_hovered && line.dates.has($selected_date)) || line.stat_code === $stat_hovered}
+						<Line x={line.x} y={line.y} color="#000000" />
+					{/if}
+				{/each}
+			</g>
+		{/if}
+	</svg>
 </div>
